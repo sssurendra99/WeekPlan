@@ -1,0 +1,15 @@
+pyproject.toml
+src/weekplan/__init__.py
+src/weekplan/__main__.py
+src/weekplan/application.py
+src/weekplan/config.py
+src/weekplan/window.py
+src/weekplan.egg-info/PKG-INFO
+src/weekplan.egg-info/SOURCES.txt
+src/weekplan.egg-info/dependency_links.txt
+src/weekplan.egg-info/entry_points.txt
+src/weekplan.egg-info/requires.txt
+src/weekplan.egg-info/top_level.txt
+src/weekplan/models/__init__.py
+src/weekplan/services/__init__.py
+src/weekplan/widgets/__init__.py

@@ -1,0 +1,5 @@
+PyGObject
+python-dateutil
+
+[dev]
+pytest

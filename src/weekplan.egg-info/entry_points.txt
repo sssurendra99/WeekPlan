@@ -1,0 +1,2 @@
+[console_scripts]
+weekplan = weekplan.__main__:main

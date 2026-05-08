@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "weekplan"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "PyGObject",
+    "python-dateutil",
+    "google-api-python-client",
+    "google-auth-oauthlib",
+    "google-auth-httplib2",
+]
+
+[project.scripts]
+weekplan = "weekplan.__main__:main"
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
