@@ -1,13 +1,17 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Sumal Surendra
+
 from __future__ import annotations
 
-import gi
 import math
+
+import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from datetime import date, datetime, timedelta, timezone
-from typing import Callable, Optional
+from collections.abc import Callable
+from datetime import UTC, date, datetime, timedelta
 
 from gi.repository import Adw, GLib, Gtk
 
@@ -18,9 +22,9 @@ from ..services.recurrence import expand
 from .event_card import EventCard
 
 _DAY_NAMES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
-_HOUR_COL_W = 60    # px — width of the hour-label column
-_CELL_H     = 56    # px — height of each hour row
-_MIN_DRAG_PX = 20   # minimum vertical drag to open create dialog
+_HOUR_COL_W = 60  # px — width of the hour-label column
+_CELL_H = 56  # px — height of each hour row
+_MIN_DRAG_PX = 20  # minimum vertical drag to open create dialog
 
 
 class WeekView(Gtk.Box):
@@ -28,15 +32,15 @@ class WeekView(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self._store = store
         self._anchor_date: date = date.today()
-        self._week_start: int = week_start   # 0 = Monday, 6 = Sunday
+        self._week_start: int = week_start  # 0 = Monday, 6 = Sunday
         self._event_cards: list[Gtk.Widget] = []
         self._allday_cells: list[Gtk.Box] = []
         self._hour_labels: list[Gtk.Label] = []
-        self._on_week_changed: Optional[Callable[[date], None]] = None
-        self._on_events_changed: Optional[Callable[[], None]] = None
+        self._on_week_changed: Callable[[date], None] | None = None
+        self._on_events_changed: Callable[[], None] | None = None
 
         # Drag-to-create state
-        self._drag_col: Optional[int] = None
+        self._drag_col: int | None = None
         self._drag_start_hour: int = 0
         self._drag_end_hour: int = 1
 
@@ -95,12 +99,14 @@ class WeekView(Gtk.Box):
                 cell.remove(child)
 
         dates = self._week_dates()
-        week_start_dt = datetime(dates[0].year,  dates[0].month,  dates[0].day,  tzinfo=timezone.utc)
-        week_end_dt   = datetime(dates[-1].year, dates[-1].month, dates[-1].day, tzinfo=timezone.utc) + timedelta(days=1)
+        week_start_dt = datetime(dates[0].year, dates[0].month, dates[0].day, tzinfo=UTC)
+        week_end_dt = datetime(
+            dates[-1].year, dates[-1].month, dates[-1].day, tzinfo=UTC
+        ) + timedelta(days=1)
 
         events = self._store.list_in_range(week_start_dt, week_end_dt)
         date_to_col = {d: i + 1 for i, d in enumerate(dates)}
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         today = date.today()
 
         # All-day events → banner row
@@ -131,17 +137,20 @@ class WeekView(Gtk.Box):
                 if occ_start.date() not in date_to_col:
                     continue
                 occurrences.append((event, occ_start, occ_end))
-                if occ_start.date() == today and occ_start > now:
-                    if next_up_start is None or occ_start < next_up_start:
-                        next_up_start = occ_start
-                        next_up_event_id = event.id
+                if (
+                    occ_start.date() == today
+                    and occ_start > now
+                    and (next_up_start is None or occ_start < next_up_start)
+                ):
+                    next_up_start = occ_start
+                    next_up_event_id = event.id
 
         # Pass 2: create cards with the appropriate mode
         for event, occ_start, occ_end in occurrences:
             occ_date = occ_start.date()
-            col      = date_to_col[occ_date]
+            col = date_to_col[occ_date]
             grid_row = occ_start.hour
-            secs     = (occ_end - occ_start).total_seconds()
+            secs = (occ_end - occ_start).total_seconds()
             row_span = max(1, math.ceil(secs / 3600))
 
             if occ_date == today:
@@ -157,8 +166,12 @@ class WeekView(Gtk.Box):
                 mode = "tinted"
 
             card = EventCard(
-                event, occ_start, occ_end, self._on_edit_event,
-                mode=mode, on_resize=self._on_event_resize,
+                event,
+                occ_start,
+                occ_end,
+                self._on_edit_event,
+                mode=mode,
+                on_resize=self._on_event_resize,
             )
             self._grid.attach(card, col, grid_row, 1, row_span)
             self._event_cards.append(card)
@@ -170,7 +183,7 @@ class WeekView(Gtk.Box):
         row.set_halign(Gtk.Align.CENTER)
         row.add_css_class("week-nav-row")
 
-        prev = Gtk.Button(label="‹")
+        prev = Gtk.Button(label="‹")  # noqa: RUF001
         prev.add_css_class("flat")
         prev.add_css_class("nav-arrow")
         prev.connect("clicked", lambda _: self._shift(-1))
@@ -182,7 +195,7 @@ class WeekView(Gtk.Box):
         self._nav_btn.connect("clicked", lambda _: self._go_today())
         self._refresh_nav_label()
 
-        nxt = Gtk.Button(label="›")
+        nxt = Gtk.Button(label="›")  # noqa: RUF001
         nxt.add_css_class("flat")
         nxt.add_css_class("nav-arrow")
         nxt.connect("clicked", lambda _: self._shift(1))
@@ -263,9 +276,9 @@ class WeekView(Gtk.Box):
         # Drag gesture for creating new events
         drag = Gtk.GestureDrag()
         drag.set_button(1)
-        drag.connect("drag-begin",  self._on_drag_begin)
+        drag.connect("drag-begin", self._on_drag_begin)
         drag.connect("drag-update", self._on_drag_update)
-        drag.connect("drag-end",    self._on_drag_end)
+        drag.connect("drag-end", self._on_drag_end)
         self._grid_overlay.add_controller(drag)
 
         self._scroll.set_child(self._grid_overlay)
@@ -280,7 +293,7 @@ class WeekView(Gtk.Box):
     def _refresh_day_headers(self) -> None:
         dates = self._week_dates()
         today = date.today()
-        for i, (cell, d) in enumerate(zip(self._day_header_cells, dates)):
+        for cell, d in zip(self._day_header_cells, dates, strict=False):
             while (child := cell.get_first_child()) is not None:
                 cell.remove(child)
 
@@ -375,7 +388,7 @@ class WeekView(Gtk.Box):
 
     # ------------------------------------------------------------------ drag to create
 
-    def _xy_to_col_hour(self, x: float, y: float) -> Optional[tuple[int, int]]:
+    def _xy_to_col_hour(self, x: float, y: float) -> tuple[int, int] | None:
         if x < _HOUR_COL_W:
             return None
         alloc_w = self._grid.get_allocation().width
@@ -423,12 +436,20 @@ class WeekView(Gtk.Box):
         dates = self._week_dates()
         drag_date = dates[self._drag_col]
         default_start = datetime(
-            drag_date.year, drag_date.month, drag_date.day,
-            self._drag_start_hour, 0, tzinfo=timezone.utc,
+            drag_date.year,
+            drag_date.month,
+            drag_date.day,
+            self._drag_start_hour,
+            0,
+            tzinfo=UTC,
         )
         default_end = datetime(
-            drag_date.year, drag_date.month, drag_date.day,
-            min(self._drag_end_hour, 23), 0, tzinfo=timezone.utc,
+            drag_date.year,
+            drag_date.month,
+            drag_date.day,
+            min(self._drag_end_hour, 23),
+            0,
+            tzinfo=UTC,
         )
         if default_end <= default_start:
             default_end = default_start + timedelta(hours=1)
@@ -436,6 +457,7 @@ class WeekView(Gtk.Box):
         self._drag_col = None
 
         from .event_dialog import EventDialog
+
         dialog = EventDialog(default_start=default_start, default_end=default_end)
         dialog.connect("saved", self._on_dialog_saved_new)
         dialog.present(self.get_root())
@@ -448,10 +470,10 @@ class WeekView(Gtk.Box):
         col_w = (alloc_w - _HOUR_COL_W) / 7
         if col_w <= 0:
             return
-        margin_top   = self._drag_start_hour * _CELL_H
+        margin_top = self._drag_start_hour * _CELL_H
         margin_start = int(_HOUR_COL_W + self._drag_col * col_w) + 3
-        margin_end   = max(3, int(alloc_w - margin_start - col_w) + 3)
-        height       = max(4, (self._drag_end_hour - self._drag_start_hour) * _CELL_H - 4)
+        margin_end = max(3, int(alloc_w - margin_start - col_w) + 3)
+        height = max(4, (self._drag_end_hour - self._drag_start_hour) * _CELL_H - 4)
         self._drag_preview.set_margin_top(margin_top)
         self._drag_preview.set_margin_start(margin_start)
         self._drag_preview.set_margin_end(margin_end)
@@ -466,15 +488,13 @@ class WeekView(Gtk.Box):
         new_end = event.end + timedelta(hours=delta_px / _CELL_H)
         # Round to nearest 30 minutes
         total_min = new_end.hour * 60 + new_end.minute
-        rounded   = round(total_min / 30) * 30
-        rounded   = max(0, min(rounded, 23 * 60 + 30))
-        new_end   = new_end.replace(
-            hour=rounded // 60, minute=rounded % 60, second=0, microsecond=0
-        )
+        rounded = round(total_min / 30) * 30
+        rounded = max(0, min(rounded, 23 * 60 + 30))
+        new_end = new_end.replace(hour=rounded // 60, minute=rounded % 60, second=0, microsecond=0)
         if new_end <= event.start:
             new_end = event.start + timedelta(minutes=30)
-        event.end       = new_end
-        event.updated_at = datetime.now(timezone.utc)
+        event.end = new_end
+        event.updated_at = datetime.now(UTC)
         self._store.update(event)
         self.refresh()
 
@@ -496,11 +516,11 @@ class WeekView(Gtk.Box):
         dates = self._week_dates()
         s, e = dates[0], dates[-1]
         if s.month == e.month and s.year == e.year:
-            label = f"{s.strftime('%b %-d')}–{e.strftime('%-d, %Y')}"
+            label = f"{s.strftime('%b %-d')}–{e.strftime('%-d, %Y')}"  # noqa: RUF001
         elif s.year == e.year:
-            label = f"{s.strftime('%b %-d')} – {e.strftime('%b %-d, %Y')}"
+            label = f"{s.strftime('%b %-d')} – {e.strftime('%b %-d, %Y')}"  # noqa: RUF001
         else:
-            label = f"{s.strftime('%b %-d, %Y')} – {e.strftime('%b %-d, %Y')}"
+            label = f"{s.strftime('%b %-d, %Y')} – {e.strftime('%b %-d, %Y')}"  # noqa: RUF001
         self._nav_btn.set_label(label)
         if self._on_week_changed:
             self._on_week_changed(dates[0])
@@ -541,23 +561,22 @@ class WeekView(Gtk.Box):
             body=_("Do you want to edit all occurrences of this event?"),
         )
         alert.add_response("cancel", _("Cancel"))
-        alert.add_response("this",   _("This Occurrence"))
-        alert.add_response("all",    _("All Occurrences"))
+        alert.add_response("this", _("This Occurrence"))
+        alert.add_response("all", _("All Occurrences"))
         alert.set_response_appearance("all", Adw.ResponseAppearance.SUGGESTED)
         alert.set_response_enabled("this", False)
         alert.connect("response", self._on_recurring_response, event)
         alert.present(self.get_root())
 
-    def _on_recurring_response(
-        self, _alert: Adw.AlertDialog, response: str, event: Event
-    ) -> None:
+    def _on_recurring_response(self, _alert: Adw.AlertDialog, response: str, event: Event) -> None:
         if response == "all":
             self._open_edit_dialog(event)
 
     def _open_edit_dialog(self, event: Event) -> None:
         from .event_dialog import EventDialog
+
         dialog = EventDialog(event)
-        dialog.connect("saved",   self._on_dialog_saved_edit)
+        dialog.connect("saved", self._on_dialog_saved_edit)
         dialog.connect("deleted", self._on_dialog_deleted)
         dialog.present(self.get_root())
 

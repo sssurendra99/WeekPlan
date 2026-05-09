@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Sumal Surendra
+
 from __future__ import annotations
 
 import gi
@@ -5,8 +8,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from datetime import date, datetime, timezone
-from typing import Optional
+from datetime import UTC, date, datetime
 
 from gi.repository import Adw, GObject, Gtk
 
@@ -15,36 +17,36 @@ from ..models.event import Event
 
 _REPEAT_OPTIONS: list[tuple[str, str | None]] = [
     ("Does not repeat", None),
-    ("Daily",           "FREQ=DAILY"),
-    ("Weekly",          "FREQ=WEEKLY"),
-    ("Weekdays only",   "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"),
-    ("Custom (RRULE)",  None),   # user types the string themselves
+    ("Daily", "FREQ=DAILY"),
+    ("Weekly", "FREQ=WEEKLY"),
+    ("Weekdays only", "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"),
+    ("Custom (RRULE)", None),  # user types the string themselves
 ]
 _CUSTOM_IDX = len(_REPEAT_OPTIONS) - 1
 
 _PRESET_COLORS: list[tuple[str, str]] = [
-    ("sky",      "Sky"),
-    ("sage",     "Sage"),
-    ("amber",    "Amber"),
-    ("coral",    "Coral"),
+    ("sky", "Sky"),
+    ("sage", "Sage"),
+    ("amber", "Amber"),
+    ("coral", "Coral"),
     ("lavender", "Lavender"),
-    ("rose",     "Rose"),
-    ("teal",     "Teal"),
-    ("slate",    "Slate"),
+    ("rose", "Rose"),
+    ("teal", "Teal"),
+    ("slate", "Slate"),
 ]
 
 
 class EventDialog(Adw.Dialog):
-    __gsignals__ = {
-        "saved":   (GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT,)),
+    __gsignals__ = {  # noqa: RUF012
+        "saved": (GObject.SignalFlags.RUN_FIRST, None, (GObject.TYPE_PYOBJECT,)),
         "deleted": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
     }
 
     def __init__(
         self,
-        event: Optional[Event] = None,
-        default_start: Optional[datetime] = None,
-        default_end: Optional[datetime] = None,
+        event: Event | None = None,
+        default_start: datetime | None = None,
+        default_end: datetime | None = None,
     ) -> None:
         super().__init__()
         self._event = event
@@ -104,11 +106,11 @@ class EventDialog(Adw.Dialog):
         dt_group = Adw.PreferencesGroup()
         dt_group.set_title(_("Date and Time"))
 
-        init_date    = default_start.date() if default_start else date.today()
-        init_start_h = default_start.hour   if default_start else 9
+        init_date = default_start.date() if default_start else date.today()
+        init_start_h = default_start.hour if default_start else 9
         init_start_m = default_start.minute if default_start else 0
-        init_end_h   = default_end.hour     if default_end   else 10
-        init_end_m   = default_end.minute   if default_end   else 0
+        init_end_h = default_end.hour if default_end else 10
+        init_end_m = default_end.minute if default_end else 0
 
         # All-day switch
         self._allday_row = Adw.SwitchRow()
@@ -116,16 +118,20 @@ class EventDialog(Adw.Dialog):
         self._allday_row.connect("notify::active", self._on_allday_toggled)
         dt_group.add(self._allday_row)
 
-        self._year_spin  = self._make_spin(2000, 2100, value=init_date.year,  width=5)
-        self._month_spin = self._make_spin(1,    12,   value=init_date.month, width=2)
-        self._day_spin   = self._make_spin(1,    31,   value=init_date.day,   width=2)
-        dt_group.add(self._make_dt_row(_("Date"), self._joined(
-            self._year_spin, "/", self._month_spin, "/", self._day_spin
-        )))
+        self._year_spin = self._make_spin(2000, 2100, value=init_date.year, width=5)
+        self._month_spin = self._make_spin(1, 12, value=init_date.month, width=2)
+        self._day_spin = self._make_spin(1, 31, value=init_date.day, width=2)
+        dt_group.add(
+            self._make_dt_row(
+                _("Date"), self._joined(self._year_spin, "/", self._month_spin, "/", self._day_spin)
+            )
+        )
 
         self._start_h = self._make_spin(0, 23, value=init_start_h, width=2)
         self._start_m = self._make_spin(0, 59, step=5, value=init_start_m, width=2)
-        self._start_row = self._make_dt_row(_("Start"), self._joined(self._start_h, ":", self._start_m))
+        self._start_row = self._make_dt_row(
+            _("Start"), self._joined(self._start_h, ":", self._start_m)
+        )
         dt_group.add(self._start_row)
 
         self._end_h = self._make_spin(0, 23, value=init_end_h, width=2)
@@ -141,9 +147,7 @@ class EventDialog(Adw.Dialog):
 
         self._repeat_row = Adw.ComboRow()
         self._repeat_row.set_title(_("Repeat"))
-        self._repeat_row.set_model(
-            Gtk.StringList.new([label for label, _ in _REPEAT_OPTIONS])
-        )
+        self._repeat_row.set_model(Gtk.StringList.new([label for label, _ in _REPEAT_OPTIONS]))
         self._repeat_row.connect("notify::selected", self._on_repeat_changed)
         recur_group.add(self._repeat_row)
 
@@ -160,9 +164,7 @@ class EventDialog(Adw.Dialog):
         color_group.set_title(_("Appearance"))
         self._color_row = Adw.ComboRow()
         self._color_row.set_title(_("Color"))
-        self._color_row.set_model(
-            Gtk.StringList.new([name for _, name in _PRESET_COLORS])
-        )
+        self._color_row.set_model(Gtk.StringList.new([name for _, name in _PRESET_COLORS]))
         color_group.add(self._color_row)
         content.append(color_group)
 
@@ -206,8 +208,9 @@ class EventDialog(Adw.Dialog):
         return row
 
     @staticmethod
-    def _make_spin(lower: int, upper: int, *,
-                   value: int = 0, step: int = 1, width: int = 2) -> Gtk.SpinButton:
+    def _make_spin(
+        lower: int, upper: int, *, value: int = 0, step: int = 1, width: int = 2
+    ) -> Gtk.SpinButton:
         adj = Gtk.Adjustment.new(value, lower, upper, step, step, 0)
         spin = Gtk.SpinButton()
         spin.set_adjustment(adj)
@@ -215,7 +218,7 @@ class EventDialog(Adw.Dialog):
         spin.set_snap_to_ticks(True)
         spin.set_width_chars(width)
         spin.set_max_width_chars(width)
-        spin.set_hexpand(False)   # GtkEntry subclass defaults hexpand=True; override it
+        spin.set_hexpand(False)  # GtkEntry subclass defaults hexpand=True; override it
         return spin
 
     @staticmethod
@@ -223,7 +226,7 @@ class EventDialog(Adw.Dialog):
         """Build a horizontal box alternating widgets and separator labels."""
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         box.set_valign(Gtk.Align.CENTER)
-        box.set_hexpand(False)    # prevent suffix from stealing title-label space
+        box.set_hexpand(False)  # prevent suffix from stealing title-label space
         box.set_halign(Gtk.Align.END)
         for item in items:
             if isinstance(item, str):
@@ -280,7 +283,7 @@ class EventDialog(Adw.Dialog):
         if event.description:
             self._desc_view.get_buffer().set_text(event.description)
 
-    def _build_event(self) -> Optional[Event]:
+    def _build_event(self) -> Event | None:
         title = self._title_row.get_text().strip()
         if not title:
             return None
@@ -297,19 +300,20 @@ class EventDialog(Adw.Dialog):
         all_day = self._allday_row.get_active()
         if all_day:
             from datetime import timedelta
-            start_dt = datetime(d.year, d.month, d.day, 0, 0, tzinfo=timezone.utc)
-            end_dt   = start_dt + timedelta(hours=23, minutes=59)
+
+            start_dt = datetime(d.year, d.month, d.day, 0, 0, tzinfo=UTC)
+            end_dt = start_dt + timedelta(hours=23, minutes=59)
         else:
             sh, sm = self._start_h.get_value_as_int(), self._start_m.get_value_as_int()
-            eh, em = self._end_h.get_value_as_int(),   self._end_m.get_value_as_int()
-            start_dt = datetime(d.year, d.month, d.day, sh, sm, tzinfo=timezone.utc)
-            end_dt   = datetime(d.year, d.month, d.day, eh, em, tzinfo=timezone.utc)
+            eh, em = self._end_h.get_value_as_int(), self._end_m.get_value_as_int()
+            start_dt = datetime(d.year, d.month, d.day, sh, sm, tzinfo=UTC)
+            end_dt = datetime(d.year, d.month, d.day, eh, em, tzinfo=UTC)
             if end_dt <= start_dt:
                 return None
 
         color = _PRESET_COLORS[self._color_row.get_selected()][0]
-        buf   = self._desc_view.get_buffer()
-        desc  = buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False)
+        buf = self._desc_view.get_buffer()
+        desc = buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False)
 
         # Recurrence
         sel = self._repeat_row.get_selected()
@@ -319,18 +323,25 @@ class EventDialog(Adw.Dialog):
             rrule = _REPEAT_OPTIONS[sel][1]
 
         if self._event is not None:
-            self._event.title       = title
-            self._event.start       = start_dt
-            self._event.end         = end_dt
-            self._event.color       = color
-            self._event.all_day     = all_day
+            self._event.title = title
+            self._event.start = start_dt
+            self._event.end = end_dt
+            self._event.color = color
+            self._event.all_day = all_day
             self._event.description = desc
-            self._event.rrule       = rrule
-            self._event.updated_at  = datetime.now(timezone.utc)
+            self._event.rrule = rrule
+            self._event.updated_at = datetime.now(UTC)
             return self._event
 
-        return Event(title=title, start=start_dt, end=end_dt, color=color,
-                     all_day=all_day, description=desc, rrule=rrule)
+        return Event(
+            title=title,
+            start=start_dt,
+            end=end_dt,
+            color=color,
+            all_day=all_day,
+            description=desc,
+            rrule=rrule,
+        )
 
     # ------------------------------------------------------------------ signal handlers
 

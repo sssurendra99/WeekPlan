@@ -1,11 +1,12 @@
-from datetime import datetime, timedelta, timezone
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Sumal Surendra
 
-import pytest
+from datetime import UTC, datetime, timedelta
 
 from weekplan.models.event import Event
 from weekplan.services.recurrence import expand
 
-UTC = timezone.utc
+UTC = UTC
 
 
 def make_event(start: datetime, end: datetime, rrule: str | None = None) -> Event:
@@ -13,6 +14,7 @@ def make_event(start: datetime, end: datetime, rrule: str | None = None) -> Even
 
 
 # ── No rrule ──────────────────────────────────────────────────────────────────
+
 
 def test_no_rrule_in_range() -> None:
     ev = make_event(
@@ -49,6 +51,7 @@ def test_no_rrule_at_range_end_is_excluded() -> None:
 
 # ── Daily ─────────────────────────────────────────────────────────────────────
 
+
 def test_daily_count_in_one_week() -> None:
     ev = make_event(
         datetime(2024, 1, 1, 9, 0, tzinfo=UTC),
@@ -56,7 +59,7 @@ def test_daily_count_in_one_week() -> None:
         rrule="FREQ=DAILY",
     )
     result = expand(ev, datetime(2024, 1, 8, tzinfo=UTC), datetime(2024, 1, 15, tzinfo=UTC))
-    assert len(result) == 7  # Jan 8–14
+    assert len(result) == 7  # Jan 8-14
 
 
 def test_daily_duration_preserved() -> None:
@@ -82,6 +85,7 @@ def test_daily_first_occurrence_date() -> None:
 
 # ── Weekly ────────────────────────────────────────────────────────────────────
 
+
 def test_weekly_count_in_two_weeks() -> None:
     # Jan 1 2024 is a Monday
     ev = make_event(
@@ -106,13 +110,14 @@ def test_weekly_all_on_same_weekday() -> None:
 
 # ── Weekdays ──────────────────────────────────────────────────────────────────
 
+
 def test_weekdays_only_count() -> None:
     ev = make_event(
-        datetime(2024, 1, 1, 9, 0, tzinfo=UTC),   # Monday
+        datetime(2024, 1, 1, 9, 0, tzinfo=UTC),  # Monday
         datetime(2024, 1, 1, 10, 0, tzinfo=UTC),
         rrule="FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
     )
-    # Jan 1 (Mon) → Jan 8 (Mon, exc): Mon–Fri of first week = 5
+    # Jan 1 (Mon) -> Jan 8 (Mon, exc): Mon-Fri of first week = 5
     result = expand(ev, datetime(2024, 1, 1, tzinfo=UTC), datetime(2024, 1, 8, tzinfo=UTC))
     assert len(result) == 5
 
@@ -130,9 +135,10 @@ def test_weekdays_no_weekend() -> None:
 
 # ── Custom BYDAY ──────────────────────────────────────────────────────────────
 
+
 def test_custom_byday_mwf() -> None:
     ev = make_event(
-        datetime(2024, 1, 1, 9, 0, tzinfo=UTC),   # Monday
+        datetime(2024, 1, 1, 9, 0, tzinfo=UTC),  # Monday
         datetime(2024, 1, 1, 10, 0, tzinfo=UTC),
         rrule="FREQ=WEEKLY;BYDAY=MO,WE,FR",
     )
@@ -143,6 +149,7 @@ def test_custom_byday_mwf() -> None:
 
 
 # ── Edge cases ────────────────────────────────────────────────────────────────
+
 
 def test_empty_range_returns_nothing() -> None:
     ev = make_event(

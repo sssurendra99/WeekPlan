@@ -1,9 +1,11 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Sumal Surendra
+
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 from ..config import get_user_data_dir
 from .event import Event
@@ -26,7 +28,7 @@ _VALID_COLOR_NAMES = frozenset(
 
 
 class EventStore:
-    def __init__(self, db_path: Optional[Path] = None) -> None:
+    def __init__(self, db_path: Path | None = None) -> None:
         if db_path is None:
             db_path = get_user_data_dir() / "events.db"
         self._path = Path(db_path)
@@ -39,9 +41,7 @@ class EventStore:
 
     def _migrate(self) -> None:
         cur = self._conn.cursor()
-        cur.execute(
-            "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL)"
-        )
+        cur.execute("CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL)")
         row = cur.execute("SELECT version FROM schema_version").fetchone()
         version = row["version"] if row else 0
         if version < 1:
@@ -106,14 +106,14 @@ class EventStore:
     @staticmethod
     def _to_iso(dt: datetime) -> str:
         if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        return dt.astimezone(timezone.utc).isoformat()
+            dt = dt.replace(tzinfo=UTC)
+        return dt.astimezone(UTC).isoformat()
 
     @staticmethod
     def _from_iso(s: str) -> datetime:
         dt = datetime.fromisoformat(s)
         if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
+            dt = dt.replace(tzinfo=UTC)
         return dt
 
     # --------------------------------------------------------------- row mapping
@@ -137,7 +137,8 @@ class EventStore:
     def add(self, event: Event) -> Event:
         cur = self._conn.execute(
             """
-            INSERT INTO events (title, start, end, description, color, all_day, rrule, google_id, updated_at)
+            INSERT INTO events
+                (title, start, end, description, color, all_day, rrule, google_id, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
@@ -182,27 +183,21 @@ class EventStore:
         self._conn.commit()
 
     def delete(self, event_id: int) -> None:
-        row = self._conn.execute(
-            "SELECT google_id FROM events WHERE id=?", (event_id,)
-        ).fetchone()
+        row = self._conn.execute("SELECT google_id FROM events WHERE id=?", (event_id,)).fetchone()
         if row and row["google_id"]:
             self._conn.execute(
                 "INSERT INTO tombstones (event_id, google_id, deleted_at) VALUES (?, ?, ?)",
-                (event_id, row["google_id"], self._to_iso(datetime.now(timezone.utc))),
+                (event_id, row["google_id"], self._to_iso(datetime.now(UTC))),
             )
         self._conn.execute("DELETE FROM events WHERE id=?", (event_id,))
         self._conn.commit()
 
-    def get(self, event_id: int) -> Optional[Event]:
-        row = self._conn.execute(
-            "SELECT * FROM events WHERE id=?", (event_id,)
-        ).fetchone()
+    def get(self, event_id: int) -> Event | None:
+        row = self._conn.execute("SELECT * FROM events WHERE id=?", (event_id,)).fetchone()
         return self._row_to_event(row) if row else None
 
-    def get_by_google_id(self, google_id: str) -> Optional[Event]:
-        row = self._conn.execute(
-            "SELECT * FROM events WHERE google_id=?", (google_id,)
-        ).fetchone()
+    def get_by_google_id(self, google_id: str) -> Event | None:
+        row = self._conn.execute("SELECT * FROM events WHERE google_id=?", (google_id,)).fetchone()
         return self._row_to_event(row) if row else None
 
     def list_all(self) -> list[Event]:
@@ -210,9 +205,7 @@ class EventStore:
         return [self._row_to_event(r) for r in rows]
 
     def get_tombstones(self) -> list[tuple[int, str]]:
-        rows = self._conn.execute(
-            "SELECT event_id, google_id FROM tombstones"
-        ).fetchall()
+        rows = self._conn.execute("SELECT event_id, google_id FROM tombstones").fetchall()
         return [(r["event_id"], r["google_id"]) for r in rows]
 
     def clear_tombstone(self, event_id: int) -> None:

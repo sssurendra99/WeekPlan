@@ -1,11 +1,14 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Sumal Surendra
+
 from __future__ import annotations
 
 import gi
 
 gi.require_version("Gtk", "4.0")
 
+from collections.abc import Callable
 from datetime import datetime
-from typing import Callable, Optional
 
 from gi.repository import Gtk, Pango
 
@@ -19,8 +22,8 @@ class EventCard(Gtk.Button):
         occ_start: datetime,
         occ_end: datetime,
         on_edit: Callable[[Event], None],
-        mode: str = "tinted",   # tinted | live | past | solid
-        on_resize: Optional[Callable[[Event, float], None]] = None,
+        mode: str = "tinted",  # tinted | live | past | solid
+        on_resize: Callable[[Event, float], None] | None = None,
     ) -> None:
         super().__init__()
 
@@ -75,7 +78,7 @@ class EventCard(Gtk.Button):
 
         if duration_m >= 45:
             time_lbl = Gtk.Label(
-                label=f"{occ_start.strftime('%H:%M')} – {occ_end.strftime('%H:%M')}"
+                label=f"{occ_start.strftime('%H:%M')} – {occ_end.strftime('%H:%M')}"  # noqa: RUF001
             )
             time_lbl.set_halign(Gtk.Align.START)
             time_lbl.add_css_class("wp-event-time")

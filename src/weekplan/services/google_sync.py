@@ -1,8 +1,11 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Sumal Surendra
+
 from __future__ import annotations
 
+import contextlib
 import logging
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -35,21 +38,19 @@ class GoogleSync:
         self._service = None
         # Track last successful sync time; events with updated_at <= this
         # were already pushed and don't need re-patching.
-        self._last_sync: datetime = datetime.now(timezone.utc)
+        self._last_sync: datetime = datetime.now(UTC)
 
     # ------------------------------------------------------------------ auth
 
     def authenticate(self) -> None:
-        creds: Optional[Credentials] = None
+        creds: Credentials | None = None
         if self._token_path.exists():
             creds = Credentials.from_authorized_user_file(str(self._token_path), SCOPES)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    str(self._creds_path), SCOPES
-                )
+                flow = InstalledAppFlow.from_client_secrets_file(str(self._creds_path), SCOPES)
                 creds = flow.run_local_server(port=0)
             self._token_path.parent.mkdir(parents=True, exist_ok=True)
             self._token_path.write_text(creds.to_json())
@@ -59,7 +60,7 @@ class GoogleSync:
 
     def pull(self) -> int:
         assert self._service is not None, "Call authenticate() first"
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         time_min = (now - timedelta(days=30)).isoformat()
         time_max = (now + timedelta(days=90)).isoformat()
 
@@ -96,12 +97,8 @@ class GoogleSync:
 
         # Delete tombstoned events from Google
         for event_id, google_id in self._store.get_tombstones():
-            try:
-                self._service.events().delete(
-                    calendarId="primary", eventId=google_id
-                ).execute()
-            except Exception:
-                pass  # already deleted on remote is acceptable
+            with contextlib.suppress(Exception):
+                self._service.events().delete(calendarId="primary", eventId=google_id).execute()
             self._store.clear_tombstone(event_id)
             count += 1
 
@@ -111,12 +108,10 @@ class GoogleSync:
                 body = self._to_google_body(event)
                 try:
                     created = (
-                        self._service.events()
-                        .insert(calendarId="primary", body=body)
-                        .execute()
+                        self._service.events().insert(calendarId="primary", body=body).execute()
                     )
                     event.google_id = created["id"]
-                    event.updated_at = datetime.now(timezone.utc)
+                    event.updated_at = datetime.now(UTC)
                     self._store.update(event)
                     count += 1
                 except Exception as exc:
@@ -141,7 +136,7 @@ class GoogleSync:
         try:
             pulled = self.pull()
             pushed = self.push()
-            self._last_sync = datetime.now(timezone.utc)
+            self._last_sync = datetime.now(UTC)
             return pulled + pushed
         except Exception as exc:
             log.error("Google Calendar sync failed: %s", exc)
@@ -156,9 +151,9 @@ class GoogleSync:
         else:
             # All-day event — treat as midnight UTC
             dt = datetime.fromisoformat(dt_obj["date"] + "T00:00:00+00:00")
-        return dt.astimezone(timezone.utc)
+        return dt.astimezone(UTC)
 
-    def _extract_rrule(self, recurrence: list[str]) -> Optional[str]:
+    def _extract_rrule(self, recurrence: list[str]) -> str | None:
         for entry in recurrence:
             if entry.upper().startswith("RRULE:"):
                 return entry[6:]
@@ -166,9 +161,7 @@ class GoogleSync:
 
     def _upsert_from_remote(self, item: dict) -> bool:
         google_id = item["id"]
-        remote_updated = datetime.fromisoformat(
-            item["updated"].replace("Z", "+00:00")
-        )
+        remote_updated = datetime.fromisoformat(item["updated"].replace("Z", "+00:00"))
 
         try:
             start = self._parse_google_dt(item["start"])
@@ -216,7 +209,7 @@ class GoogleSync:
             "summary": event.title,
             "description": event.description or "",
             "start": {"dateTime": event.start.isoformat(), "timeZone": "UTC"},
-            "end":   {"dateTime": event.end.isoformat(),   "timeZone": "UTC"},
+            "end": {"dateTime": event.end.isoformat(), "timeZone": "UTC"},
         }
         if event.rrule:
             body["recurrence"] = [f"RRULE:{event.rrule}"]

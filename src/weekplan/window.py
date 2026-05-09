@@ -1,8 +1,10 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Sumal Surendra
+
 from __future__ import annotations
 
 import threading
-from datetime import date, datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, date, datetime, timedelta
 
 import gi
 
@@ -10,7 +12,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Gdk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gdk, GLib, Gio, Gtk, Pango
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk, Pango
 
 from .config import _
 from .models.event import Event
@@ -174,6 +176,7 @@ class WeekPlanWindow(Adw.ApplicationWindow):
 
     def _on_add_clicked(self, _btn) -> None:
         from .widgets.event_dialog import EventDialog
+
         dialog = EventDialog()
         dialog.connect("saved", self._on_event_created)
         dialog.present(self)
@@ -191,8 +194,8 @@ class WeekPlanWindow(Adw.ApplicationWindow):
             self._upcoming_box.remove(child)
 
         today = date.today()
-        day_start = datetime(today.year, today.month, today.day, tzinfo=timezone.utc)
-        day_end   = day_start + timedelta(days=1)
+        day_start = datetime(today.year, today.month, today.day, tzinfo=UTC)
+        day_end = day_start + timedelta(days=1)
         events = self._store.list_in_range(day_start, day_end)
 
         occurrences: list[tuple[datetime, Event]] = []
@@ -232,10 +235,7 @@ class WeekPlanWindow(Adw.ApplicationWindow):
         info.append(title)
 
         local_start = occ_start.astimezone()
-        if event.all_day:
-            date_str = _("All day")
-        else:
-            date_str = local_start.strftime("%H:%M")
+        date_str = _("All day") if event.all_day else local_start.strftime("%H:%M")
 
         time_lbl = Gtk.Label(label=date_str)
         time_lbl.set_halign(Gtk.Align.START)
@@ -247,6 +247,7 @@ class WeekPlanWindow(Adw.ApplicationWindow):
 
     def _on_show_preferences(self, _action: Gio.SimpleAction, _param: object) -> None:
         from .widgets.preferences_dialog import PreferencesDialog
+
         dialog = PreferencesDialog(self._prefs)
         dialog.present(self)
 
@@ -275,7 +276,7 @@ class WeekPlanWindow(Adw.ApplicationWindow):
         except Exception as exc:
             GLib.idle_add(self._on_sync_done, 0, exc)
 
-    def _on_sync_done(self, n: int, error: Optional[Exception]) -> bool:
+    def _on_sync_done(self, n: int, error: Exception | None) -> bool:
         self._restore_sync_btn()
         if error is None:
             self._week_view.refresh()

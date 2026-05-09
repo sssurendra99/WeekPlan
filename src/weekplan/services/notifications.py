@@ -1,6 +1,9 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Sumal Surendra
+
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 import gi
@@ -8,7 +11,7 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, GLib, Gio
+from gi.repository import Adw, Gio, GLib
 
 from ..models.store import EventStore
 from ..services.recurrence import expand
@@ -56,14 +59,14 @@ class NotificationService:
         return GLib.SOURCE_CONTINUE
 
     def schedule_upcoming(self) -> None:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         window_end = now + timedelta(hours=24)
 
         events = self._store.list_in_range(now, window_end)
         lead = self._prefs.lead_time_minutes
 
         for event in events:
-            for occ_start, occ_end in expand(event, now, window_end):
+            for occ_start, _occ_end in expand(event, now, window_end):
                 notif_id = f"weekplan-{event.id}-{occ_start.strftime('%Y%m%dT%H%M%S')}"
                 if notif_id in self._scheduled:
                     continue
