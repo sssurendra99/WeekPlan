@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from dateutil.rrule import rrulestr
 
@@ -28,11 +28,11 @@ def expand(
     # dateutil works most reliably with naive UTC datetimes — strip tzinfo,
     # compute, then re-attach UTC before returning.
     def _naive(dt: datetime) -> datetime:
-        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+        return dt.astimezone(UTC).replace(tzinfo=None)
 
     dtstart_n = _naive(event.start)
-    rs_n      = _naive(range_start)
-    re_n      = _naive(range_end)
+    rs_n = _naive(range_start)
+    re_n = _naive(range_end)
 
     rule = rrulestr(event.rrule, dtstart=dtstart_n, ignoretz=True)
 
@@ -41,8 +41,8 @@ def expand(
     # the store's list_in_range semantics.
     return [
         (
-            occ.replace(tzinfo=timezone.utc),
-            (occ + duration).replace(tzinfo=timezone.utc),
+            occ.replace(tzinfo=UTC),
+            (occ + duration).replace(tzinfo=UTC),
         )
         for occ in rule.between(rs_n, re_n, inc=True)
         if occ < re_n

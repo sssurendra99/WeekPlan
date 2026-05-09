@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/sssurendra99/weekplan/discussions
+    about: Ask questions, propose ideas, share your workflow
+  - name: 🔒 Security vulnerability
+    url: https://github.com/sssurendra99/weekplan/security/advisories/new
+    about: Report a security issue privately

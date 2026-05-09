@@ -1,0 +1,59 @@
+name: 💡 Feature request
+description: Suggest an idea or enhancement
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before submitting: please check [Discussions](https://github.com/sssurendra99/weekplan/discussions) for similar ideas. For big features, start a Discussion FIRST.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What problem does this solve? Who benefits?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups or examples
+      description: Drag and drop images, or paste links.
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Estimated scope
+      options:
+        - Small (a few hours)
+        - Medium (a day or two)
+        - Large (weeks)
+        - Not sure
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: This aligns with WeekPlan's goals (lightweight, native, focused)
+          required: true
+        - label: I'm willing to discuss approach in this issue before code is written
+          required: true
+        - label: I searched existing issues and Discussions
+          required: true

@@ -1,7 +1,6 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
 
 import gi
 
@@ -9,7 +8,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Gdk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gdk, GLib, Gio, Gtk
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 from .config import APP_ID
 from .models.store import EventStore
@@ -26,7 +25,7 @@ class WeekPlanApplication(Adw.Application):
         self._started = False
 
     def do_startup(self) -> None:
-        Adw.Application.do_startup(self)   # PyGObject: chain C vfunc explicitly
+        Adw.Application.do_startup(self)  # PyGObject: chain C vfunc explicitly
         provider = Gtk.CssProvider()
         css_path = Path(__file__).parent / "style.css"
         provider.load_from_string(css_path.read_text())
@@ -65,6 +64,7 @@ class WeekPlanApplication(Adw.Application):
     def _create_google_sync(self, store: EventStore):
         try:
             from .services.google_sync import GoogleSync
+
             return GoogleSync(store)
         except FileNotFoundError as exc:
             log.info("Google sync unavailable: %s", exc)

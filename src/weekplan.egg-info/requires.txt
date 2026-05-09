@@ -1,5 +1,11 @@
 PyGObject
 python-dateutil
+google-api-python-client
+google-auth-oauthlib
+google-auth-httplib2
 
 [dev]
 pytest
+pytest-cov
+ruff
+pre-commit
