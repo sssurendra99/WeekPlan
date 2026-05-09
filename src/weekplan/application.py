@@ -1,5 +1,6 @@
 import logging
 import sys
+from pathlib import Path
 from typing import Optional
 
 import gi
@@ -18,61 +19,6 @@ from .window import WeekPlanWindow
 
 log = logging.getLogger(__name__)
 
-_CSS = """
-/* ── Navigation row ─────────────────────────────────────────────────── */
-.week-nav-row {
-    padding: 4px 0;
-    border-bottom: 1px solid rgba(127,127,127,0.25);
-}
-
-/* ── Header cells (day names + date numbers) ─────────────────────────── */
-.day-header-cell {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    border-left: 1px solid rgba(127,127,127,0.2);
-    border-bottom: 1px solid rgba(127,127,127,0.4);
-}
-
-/* Corner (top-left of the grid, above hour labels) */
-.hour-corner {
-    border-bottom: 1px solid rgba(127,127,127,0.4);
-}
-
-/* ── Hour cells ──────────────────────────────────────────────────────── */
-.hour-cell {
-    border-left: 1px solid rgba(127,127,127,0.18);
-    border-bottom: 1px solid rgba(127,127,127,0.12);
-}
-
-/* ── Today badge (circle around today's date number) ─────────────────── */
-label.today-badge {
-    background-color: @accent_bg_color;
-    color: @accent_fg_color;
-    border-radius: 50%;
-    min-width: 30px;
-    min-height: 30px;
-    padding: 2px 4px;
-}
-
-/* ── Event cards ─────────────────────────────────────────────────────── */
-button.event-card {
-    padding: 0;
-    min-height: 0;
-    box-shadow: none;
-    border: none;
-    outline: none;
-}
-
-button.event-card:hover {
-    filter: brightness(1.08);
-}
-
-button.event-card:focus-visible {
-    outline: 2px solid @accent_color;
-    outline-offset: -2px;
-}
-"""
-
 
 class WeekPlanApplication(Adw.Application):
     def __init__(self) -> None:
@@ -82,7 +28,8 @@ class WeekPlanApplication(Adw.Application):
     def do_startup(self) -> None:
         Adw.Application.do_startup(self)   # PyGObject: chain C vfunc explicitly
         provider = Gtk.CssProvider()
-        provider.load_from_string(_CSS)
+        css_path = Path(__file__).parent / "style.css"
+        provider.load_from_string(css_path.read_text())
         Gtk.StyleContext.add_provider_for_display(
             Gdk.Display.get_default(),
             provider,

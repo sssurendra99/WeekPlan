@@ -12,7 +12,8 @@ class Event:
     start: datetime
     end: datetime
     description: str = ""
-    color: str = "#3584e4"
+    color: str = "sky"   # one of: sky sage amber coral lavender rose teal slate
+    all_day: bool = False
     rrule: Optional[str] = None
     google_id: Optional[str] = None
     id: Optional[int] = None

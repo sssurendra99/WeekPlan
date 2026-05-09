@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
-_DEFAULT_COLOR = "#3584e4"
+_DEFAULT_COLOR = "sky"
 
 
 class GoogleSync:

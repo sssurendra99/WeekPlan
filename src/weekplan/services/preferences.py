@@ -10,6 +10,7 @@ from ..config import get_user_config_dir
 @dataclass
 class _PrefsData:
     lead_time_minutes: int = 10
+    week_start_day: int = 0   # 0 = Monday, 6 = Sunday
 
 
 class PreferencesStore:
@@ -18,6 +19,14 @@ class PreferencesStore:
     def __init__(self) -> None:
         self._path: Path = get_user_config_dir() / "preferences.json"
         self._data = self._load()
+        self._callbacks: list = []
+
+    def on_changed(self, callback) -> None:
+        self._callbacks.append(callback)
+
+    def _notify(self) -> None:
+        for cb in self._callbacks:
+            cb()
 
     # ------------------------------------------------------------------ I/O
 
@@ -45,3 +54,14 @@ class PreferencesStore:
     def lead_time_minutes(self, value: int) -> None:
         self._data.lead_time_minutes = max(1, int(value))
         self._save()
+        self._notify()
+
+    @property
+    def week_start_day(self) -> int:
+        return self._data.week_start_day
+
+    @week_start_day.setter
+    def week_start_day(self, value: int) -> None:
+        self._data.week_start_day = int(value)
+        self._save()
+        self._notify()

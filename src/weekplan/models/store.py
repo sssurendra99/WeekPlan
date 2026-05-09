@@ -8,7 +8,21 @@ from typing import Optional
 from ..config import get_user_data_dir
 from .event import Event
 
-_SCHEMA_VERSION = 2
+_SCHEMA_VERSION = 4
+
+# Maps old hex color values to the new named-category system
+_HEX_TO_COLOR_NAME: dict[str, str] = {
+    "#3584e4": "sky",
+    "#e66100": "amber",
+    "#2ec27e": "sage",
+    "#e01b24": "coral",
+    "#9141ac": "lavender",
+    "#f5c211": "amber",
+    "#1c9ca0": "teal",
+}
+_VALID_COLOR_NAMES = frozenset(
+    ["sky", "sage", "amber", "coral", "lavender", "rose", "teal", "slate"]
+)
 
 
 class EventStore:
@@ -34,6 +48,10 @@ class EventStore:
             self._apply_v1(cur)
         if version < 2:
             self._apply_v2(cur)
+        if version < 3:
+            self._apply_v3(cur)
+        if version < 4:
+            self._apply_v4(cur)
         self._conn.commit()
 
     def _apply_v1(self, cur: sqlite3.Cursor) -> None:
@@ -64,6 +82,25 @@ class EventStore:
         cur.execute("DELETE FROM schema_version")
         cur.execute("INSERT INTO schema_version (version) VALUES (2)")
 
+    def _apply_v4(self, cur: sqlite3.Cursor) -> None:
+        cur.execute("ALTER TABLE events ADD COLUMN all_day INTEGER NOT NULL DEFAULT 0")
+        cur.execute("DELETE FROM schema_version")
+        cur.execute("INSERT INTO schema_version (version) VALUES (4)")
+
+    def _apply_v3(self, cur: sqlite3.Cursor) -> None:
+        for hex_color, name in _HEX_TO_COLOR_NAME.items():
+            cur.execute(
+                "UPDATE events SET color=? WHERE LOWER(color)=LOWER(?)",
+                (name, hex_color),
+            )
+        placeholders = ",".join("?" * len(_VALID_COLOR_NAMES))
+        cur.execute(
+            f"UPDATE events SET color='sky' WHERE color NOT IN ({placeholders})",
+            tuple(_VALID_COLOR_NAMES),
+        )
+        cur.execute("DELETE FROM schema_version")
+        cur.execute("INSERT INTO schema_version (version) VALUES (3)")
+
     # --------------------------------------------------------------- datetime helpers
 
     @staticmethod
@@ -88,6 +125,7 @@ class EventStore:
             end=self._from_iso(row["end"]),
             description=row["description"],
             color=row["color"],
+            all_day=bool(row["all_day"]),
             rrule=row["rrule"],
             google_id=row["google_id"],
             id=row["id"],
@@ -99,8 +137,8 @@ class EventStore:
     def add(self, event: Event) -> Event:
         cur = self._conn.execute(
             """
-            INSERT INTO events (title, start, end, description, color, rrule, google_id, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO events (title, start, end, description, color, all_day, rrule, google_id, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 event.title,
@@ -108,6 +146,7 @@ class EventStore:
                 self._to_iso(event.end),
                 event.description,
                 event.color,
+                int(event.all_day),
                 event.rrule,
                 event.google_id,
                 self._to_iso(event.updated_at),
@@ -123,7 +162,7 @@ class EventStore:
         self._conn.execute(
             """
             UPDATE events
-               SET title=?, start=?, end=?, description=?, color=?,
+               SET title=?, start=?, end=?, description=?, color=?, all_day=?,
                    rrule=?, google_id=?, updated_at=?
              WHERE id=?
             """,
@@ -133,6 +172,7 @@ class EventStore:
                 self._to_iso(event.end),
                 event.description,
                 event.color,
+                int(event.all_day),
                 event.rrule,
                 event.google_id,
                 self._to_iso(event.updated_at),

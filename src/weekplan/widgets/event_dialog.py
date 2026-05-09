@@ -23,12 +23,14 @@ _REPEAT_OPTIONS: list[tuple[str, str | None]] = [
 _CUSTOM_IDX = len(_REPEAT_OPTIONS) - 1
 
 _PRESET_COLORS: list[tuple[str, str]] = [
-    ("#3584e4", "Blue"),
-    ("#e66100", "Orange"),
-    ("#2ec27e", "Green"),
-    ("#e01b24", "Red"),
-    ("#9141ac", "Purple"),
-    ("#f5c211", "Yellow"),
+    ("sky",      "Sky"),
+    ("sage",     "Sage"),
+    ("amber",    "Amber"),
+    ("coral",    "Coral"),
+    ("lavender", "Lavender"),
+    ("rose",     "Rose"),
+    ("teal",     "Teal"),
+    ("slate",    "Slate"),
 ]
 
 
@@ -38,7 +40,12 @@ class EventDialog(Adw.Dialog):
         "deleted": (GObject.SignalFlags.RUN_FIRST, None, (int,)),
     }
 
-    def __init__(self, event: Optional[Event] = None) -> None:
+    def __init__(
+        self,
+        event: Optional[Event] = None,
+        default_start: Optional[datetime] = None,
+        default_end: Optional[datetime] = None,
+    ) -> None:
         super().__init__()
         self._event = event
         is_edit = event is not None
@@ -72,13 +79,19 @@ class EventDialog(Adw.Dialog):
 
         toolbar_view.add_top_bar(header)
 
-        # ---- Content — no ScrolledWindow; let the dialog auto-size ----
+        # ---- Content — ScrolledWindow lets dialog fit in small windows ----
         content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         content.set_margin_top(8)
         content.set_margin_bottom(12)
         content.set_margin_start(12)
         content.set_margin_end(12)
-        toolbar_view.set_content(content)
+
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.set_propagate_natural_height(True)
+        scroll.set_max_content_height(560)
+        scroll.set_child(content)
+        toolbar_view.set_content(scroll)
 
         # ── Group 1: Title ────────────────────────────────────────────
         title_group = Adw.PreferencesGroup()
@@ -89,36 +102,36 @@ class EventDialog(Adw.Dialog):
 
         # ── Group 2: Date & Time ──────────────────────────────────────
         dt_group = Adw.PreferencesGroup()
-        dt_group.set_title(_("Date & Time"))
+        dt_group.set_title(_("Date and Time"))
 
-        today = date.today()
+        init_date    = default_start.date() if default_start else date.today()
+        init_start_h = default_start.hour   if default_start else 9
+        init_start_m = default_start.minute if default_start else 0
+        init_end_h   = default_end.hour     if default_end   else 10
+        init_end_m   = default_end.minute   if default_end   else 0
 
-        # Date row: [yyyy] / [mm] / [dd]
-        date_row = Adw.ActionRow()
-        date_row.set_title(_("Date"))
-        self._year_spin  = self._make_spin(2000, 2100, value=today.year,  width=5)
-        self._month_spin = self._make_spin(1,    12,   value=today.month, width=2)
-        self._day_spin   = self._make_spin(1,    31,   value=today.day,   width=2)
-        date_row.add_suffix(self._joined(
+        # All-day switch
+        self._allday_row = Adw.SwitchRow()
+        self._allday_row.set_title(_("All day"))
+        self._allday_row.connect("notify::active", self._on_allday_toggled)
+        dt_group.add(self._allday_row)
+
+        self._year_spin  = self._make_spin(2000, 2100, value=init_date.year,  width=5)
+        self._month_spin = self._make_spin(1,    12,   value=init_date.month, width=2)
+        self._day_spin   = self._make_spin(1,    31,   value=init_date.day,   width=2)
+        dt_group.add(self._make_dt_row(_("Date"), self._joined(
             self._year_spin, "/", self._month_spin, "/", self._day_spin
-        ))
-        dt_group.add(date_row)
+        )))
 
-        # Start row
-        start_row = Adw.ActionRow()
-        start_row.set_title(_("Start"))
-        self._start_h = self._make_spin(0, 23, value=9,  width=2)
-        self._start_m = self._make_spin(0, 59, step=5, value=0, width=2)
-        start_row.add_suffix(self._joined(self._start_h, ":", self._start_m))
-        dt_group.add(start_row)
+        self._start_h = self._make_spin(0, 23, value=init_start_h, width=2)
+        self._start_m = self._make_spin(0, 59, step=5, value=init_start_m, width=2)
+        self._start_row = self._make_dt_row(_("Start"), self._joined(self._start_h, ":", self._start_m))
+        dt_group.add(self._start_row)
 
-        # End row
-        end_row = Adw.ActionRow()
-        end_row.set_title(_("End"))
-        self._end_h = self._make_spin(0, 23, value=10, width=2)
-        self._end_m = self._make_spin(0, 59, step=5, value=0,  width=2)
-        end_row.add_suffix(self._joined(self._end_h, ":", self._end_m))
-        dt_group.add(end_row)
+        self._end_h = self._make_spin(0, 23, value=init_end_h, width=2)
+        self._end_m = self._make_spin(0, 59, step=5, value=init_end_m, width=2)
+        self._end_row = self._make_dt_row(_("End"), self._joined(self._end_h, ":", self._end_m))
+        dt_group.add(self._end_row)
 
         content.append(dt_group)
 
@@ -176,6 +189,23 @@ class EventDialog(Adw.Dialog):
     # ------------------------------------------------------------------ helpers
 
     @staticmethod
+    def _make_dt_row(title: str, content: Gtk.Widget) -> Adw.PreferencesRow:
+        """Row with a left label (hexpand) and right content — avoids Adw suffix squish."""
+        row = Adw.PreferencesRow()
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        box.set_margin_start(16)
+        box.set_margin_end(12)
+        box.set_margin_top(10)
+        box.set_margin_bottom(10)
+        lbl = Gtk.Label(label=title)
+        lbl.set_halign(Gtk.Align.START)
+        lbl.set_hexpand(True)
+        box.append(lbl)
+        box.append(content)
+        row.set_child(box)
+        return row
+
+    @staticmethod
     def _make_spin(lower: int, upper: int, *,
                    value: int = 0, step: int = 1, width: int = 2) -> Gtk.SpinButton:
         adj = Gtk.Adjustment.new(value, lower, upper, step, step, 0)
@@ -185,6 +215,7 @@ class EventDialog(Adw.Dialog):
         spin.set_snap_to_ticks(True)
         spin.set_width_chars(width)
         spin.set_max_width_chars(width)
+        spin.set_hexpand(False)   # GtkEntry subclass defaults hexpand=True; override it
         return spin
 
     @staticmethod
@@ -192,6 +223,8 @@ class EventDialog(Adw.Dialog):
         """Build a horizontal box alternating widgets and separator labels."""
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         box.set_valign(Gtk.Align.CENTER)
+        box.set_hexpand(False)    # prevent suffix from stealing title-label space
+        box.set_halign(Gtk.Align.END)
         for item in items:
             if isinstance(item, str):
                 box.append(Gtk.Label(label=item))
@@ -202,13 +235,22 @@ class EventDialog(Adw.Dialog):
     def _on_repeat_changed(self, combo: Adw.ComboRow, _pspec: object) -> None:
         self._custom_rrule_row.set_visible(combo.get_selected() == _CUSTOM_IDX)
 
+    def _on_allday_toggled(self, row: Adw.SwitchRow, _pspec: object) -> None:
+        is_allday = row.get_active()
+        self._start_row.set_visible(not is_allday)
+        self._end_row.set_visible(not is_allday)
+
     def _populate(self, event: Event) -> None:
-        self._title_row.set_text(event.title)   # was missing — caused silent save failure
+        self._title_row.set_text(event.title)
 
         d = event.start.date()
         self._year_spin.set_value(d.year)
         self._month_spin.set_value(d.month)
         self._day_spin.set_value(d.day)
+
+        self._allday_row.set_active(event.all_day)
+        self._start_row.set_visible(not event.all_day)
+        self._end_row.set_visible(not event.all_day)
 
         self._start_h.set_value(event.start.hour)
         self._start_m.set_value(event.start.minute)
@@ -230,8 +272,8 @@ class EventDialog(Adw.Dialog):
                 self._custom_rrule_row.set_text(event.rrule)
                 self._custom_rrule_row.set_visible(True)
 
-        for i, (hex_color, _) in enumerate(_PRESET_COLORS):
-            if hex_color.lower() == event.color.lower():
+        for i, (name, _) in enumerate(_PRESET_COLORS):
+            if name == event.color:
                 self._color_row.set_selected(i)
                 break
 
@@ -252,14 +294,18 @@ class EventDialog(Adw.Dialog):
         except ValueError:
             return None
 
-        sh, sm = self._start_h.get_value_as_int(), self._start_m.get_value_as_int()
-        eh, em = self._end_h.get_value_as_int(),   self._end_m.get_value_as_int()
-
-        start_dt = datetime(d.year, d.month, d.day, sh, sm, tzinfo=timezone.utc)
-        end_dt   = datetime(d.year, d.month, d.day, eh, em, tzinfo=timezone.utc)
-
-        if end_dt <= start_dt:
-            return None
+        all_day = self._allday_row.get_active()
+        if all_day:
+            from datetime import timedelta
+            start_dt = datetime(d.year, d.month, d.day, 0, 0, tzinfo=timezone.utc)
+            end_dt   = start_dt + timedelta(hours=23, minutes=59)
+        else:
+            sh, sm = self._start_h.get_value_as_int(), self._start_m.get_value_as_int()
+            eh, em = self._end_h.get_value_as_int(),   self._end_m.get_value_as_int()
+            start_dt = datetime(d.year, d.month, d.day, sh, sm, tzinfo=timezone.utc)
+            end_dt   = datetime(d.year, d.month, d.day, eh, em, tzinfo=timezone.utc)
+            if end_dt <= start_dt:
+                return None
 
         color = _PRESET_COLORS[self._color_row.get_selected()][0]
         buf   = self._desc_view.get_buffer()
@@ -277,13 +323,14 @@ class EventDialog(Adw.Dialog):
             self._event.start       = start_dt
             self._event.end         = end_dt
             self._event.color       = color
+            self._event.all_day     = all_day
             self._event.description = desc
             self._event.rrule       = rrule
             self._event.updated_at  = datetime.now(timezone.utc)
             return self._event
 
         return Event(title=title, start=start_dt, end=end_dt, color=color,
-                     description=desc, rrule=rrule)
+                     all_day=all_day, description=desc, rrule=rrule)
 
     # ------------------------------------------------------------------ signal handlers
 

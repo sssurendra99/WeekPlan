@@ -5,16 +5,11 @@ import gi
 gi.require_version("Gtk", "4.0")
 
 from datetime import datetime
-from typing import Callable
+from typing import Callable, Optional
 
 from gi.repository import Gtk, Pango
 
 from ..models.event import Event
-
-
-def _hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
-    h = hex_color.lstrip("#")
-    return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
 
 
 class EventCard(Gtk.Button):
@@ -24,55 +19,97 @@ class EventCard(Gtk.Button):
         occ_start: datetime,
         occ_end: datetime,
         on_edit: Callable[[Event], None],
+        mode: str = "tinted",   # tinted | live | past | solid
+        on_resize: Optional[Callable[[Event, float], None]] = None,
     ) -> None:
         super().__init__()
 
-        self.add_css_class("event-card")
+        self.add_css_class("wp-event")
+        self.add_css_class(f"color-{event.color}")
+
+        if mode in ("live", "solid"):
+            self.add_css_class("solid")
+        if mode == "past":
+            self.add_css_class("past")
+        if mode == "live":
+            self.add_css_class("live")
+
         self.set_hexpand(True)
         self.set_vexpand(True)
         self.set_halign(Gtk.Align.FILL)
         self.set_valign(Gtk.Align.FILL)
-        self.set_margin_top(1)
-        self.set_margin_bottom(1)
-        self.set_margin_start(2)
-        self.set_margin_end(2)
+        self.set_margin_top(2)
+        self.set_margin_bottom(2)
+        self.set_margin_start(3)
+        self.set_margin_end(3)
 
-        # Dynamic colour: gradient left-bar + light background tint
-        r, g, b = _hex_to_rgb(event.color)
-        css_class = f"ec-{event.id}"
-        self.add_css_class(css_class)
-        provider = Gtk.CssProvider()
-        provider.load_from_string(
-            f".{css_class} {{"
-            f"  background-image: linear-gradient("
-            f"    to right, {event.color} 4px, rgba({r},{g},{b},0.18) 4px);"
-            f"  border-radius: 4px;"
-            f"}}"
-        )
-        self.get_style_context().add_provider(
-            provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
+        duration_m = int((occ_end - occ_start).total_seconds() // 60)
+        if duration_m < 45:
+            self.add_css_class("short")
 
-        # Content: title + occurrence time subtitle
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
         box.set_margin_start(8)
-        box.set_margin_top(2)
-        box.set_margin_bottom(2)
-        box.set_margin_end(4)
+        box.set_margin_top(4)
+        box.set_margin_bottom(4)
+        box.set_margin_end(6)
 
-        title_lbl = Gtk.Label(label=event.title)
-        title_lbl.set_halign(Gtk.Align.START)
-        title_lbl.set_ellipsize(Pango.EllipsizeMode.END)
-        title_lbl.add_css_class("caption-heading")
+        if mode == "live":
+            dot_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+            dot_row.set_valign(Gtk.Align.CENTER)
+            dot = Gtk.Box()
+            dot.add_css_class("wp-live-dot")
+            dot.set_valign(Gtk.Align.CENTER)
+            title_lbl = Gtk.Label(label=event.title)
+            title_lbl.set_halign(Gtk.Align.START)
+            title_lbl.set_ellipsize(Pango.EllipsizeMode.END)
+            title_lbl.add_css_class("wp-event-title")
+            dot_row.append(dot)
+            dot_row.append(title_lbl)
+            box.append(dot_row)
+        else:
+            title_lbl = Gtk.Label(label=event.title)
+            title_lbl.set_halign(Gtk.Align.START)
+            title_lbl.set_ellipsize(Pango.EllipsizeMode.END)
+            title_lbl.add_css_class("wp-event-title")
+            box.append(title_lbl)
 
-        time_lbl = Gtk.Label(
-            label=f"{occ_start.strftime('%H:%M')} – {occ_end.strftime('%H:%M')}"
-        )
-        time_lbl.set_halign(Gtk.Align.START)
-        time_lbl.add_css_class("caption")
+        if duration_m >= 45:
+            time_lbl = Gtk.Label(
+                label=f"{occ_start.strftime('%H:%M')} – {occ_end.strftime('%H:%M')}"
+            )
+            time_lbl.set_halign(Gtk.Align.START)
+            time_lbl.add_css_class("wp-event-time")
+            box.append(time_lbl)
 
-        box.append(title_lbl)
-        box.append(time_lbl)
-        self.set_child(box)
+        if on_resize is not None:
+            overlay = Gtk.Overlay()
+            overlay.set_child(box)
+
+            handle = Gtk.Box()
+            handle.add_css_class("wp-resize-handle")
+            handle.set_valign(Gtk.Align.END)
+            handle.set_halign(Gtk.Align.FILL)
+            handle.set_can_target(True)
+            overlay.add_overlay(handle)
+
+            # Intercept clicks on the handle so they don't trigger the card edit
+            click_blocker = Gtk.GestureClick()
+            click_blocker.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+            click_blocker.connect(
+                "pressed",
+                lambda g, n, x, y: g.set_sequence_state(
+                    g.get_current_sequence(), Gtk.EventSequenceState.CLAIMED
+                ),
+            )
+            handle.add_controller(click_blocker)
+
+            drag = Gtk.GestureDrag()
+            drag.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+            drag.connect("drag-end", lambda g, ox, oy: on_resize(event, oy))
+            handle.add_controller(drag)
+
+            self.set_child(overlay)
+        else:
+            self.set_child(box)
 
         self.connect("clicked", lambda _: on_edit(event))
