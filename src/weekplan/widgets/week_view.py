@@ -416,7 +416,7 @@ class WeekView(Gtk.Box):
     def _on_drag_update(self, gesture: Gtk.GestureDrag, offset_x: float, offset_y: float) -> None:
         if self._drag_col is None:
             return
-        ok, sx, sy = gesture.get_start_point()
+        ok, _sx, sy = gesture.get_start_point()
         if not ok:
             return
         end_hour = max(self._drag_start_hour + 1, math.ceil((sy + offset_y) / _CELL_H))

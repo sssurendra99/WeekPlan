@@ -10,7 +10,7 @@ from ..config import get_user_config_dir
 @dataclass
 class _PrefsData:
     lead_time_minutes: int = 10
-    week_start_day: int = 0   # 0 = Monday, 6 = Sunday
+    week_start_day: int = 0  # 0 = Monday, 6 = Sunday
 
 
 class PreferencesStore:

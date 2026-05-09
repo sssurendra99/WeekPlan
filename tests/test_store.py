@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -8,10 +8,10 @@ from weekplan.models.store import EventStore
 
 # ------------------------------------------------------------------ helpers
 
-JAN = datetime(2024, 1, 15, 9, 0, tzinfo=timezone.utc)
-JAN_END = datetime(2024, 1, 15, 10, 0, tzinfo=timezone.utc)
-FEB = datetime(2024, 2, 15, 9, 0, tzinfo=timezone.utc)
-FEB_END = datetime(2024, 2, 15, 10, 0, tzinfo=timezone.utc)
+JAN = datetime(2024, 1, 15, 9, 0, tzinfo=UTC)
+JAN_END = datetime(2024, 1, 15, 10, 0, tzinfo=UTC)
+FEB = datetime(2024, 2, 15, 9, 0, tzinfo=UTC)
+FEB_END = datetime(2024, 2, 15, 10, 0, tzinfo=UTC)
 
 
 def make_event(**kwargs) -> Event:
@@ -28,6 +28,7 @@ def store(tmp_path: Path) -> EventStore:
 
 
 # ------------------------------------------------------------------ tests
+
 
 def test_add_get_roundtrip(store: EventStore) -> None:
     event = make_event(title="Meeting", description="Weekly sync", color="#ff0000")
@@ -85,8 +86,8 @@ def test_list_in_range_filters_correctly(store: EventStore) -> None:
     store.add(make_event(title="February", start=FEB, end=FEB_END))
 
     results = store.list_in_range(
-        datetime(2024, 1, 1, tzinfo=timezone.utc),
-        datetime(2024, 2, 1, tzinfo=timezone.utc),
+        datetime(2024, 1, 1, tzinfo=UTC),
+        datetime(2024, 2, 1, tzinfo=UTC),
     )
     titles = {e.title for e in results}
     assert "January" in titles
@@ -98,7 +99,7 @@ def test_list_in_range_end_boundary_exclusive(store: EventStore) -> None:
     store.add(make_event(title="Boundary", start=FEB, end=FEB_END))
 
     results = store.list_in_range(
-        datetime(2024, 1, 1, tzinfo=timezone.utc),
+        datetime(2024, 1, 1, tzinfo=UTC),
         FEB,  # end_dt == event.start → excluded
     )
     titles = {e.title for e in results}
@@ -106,18 +107,20 @@ def test_list_in_range_end_boundary_exclusive(store: EventStore) -> None:
 
 
 def test_rrule_events_returned_regardless_of_date(store: EventStore) -> None:
-    store.add(make_event(
-        title="Daily Standup",
-        start=datetime(2024, 1, 1, 9, 0, tzinfo=timezone.utc),
-        end=datetime(2024, 1, 1, 9, 30, tzinfo=timezone.utc),
-        rrule="FREQ=DAILY",
-    ))
+    store.add(
+        make_event(
+            title="Daily Standup",
+            start=datetime(2024, 1, 1, 9, 0, tzinfo=UTC),
+            end=datetime(2024, 1, 1, 9, 30, tzinfo=UTC),
+            rrule="FREQ=DAILY",
+        )
+    )
     store.add(make_event(title="January One-Off", start=JAN, end=JAN_END))
 
     # Query February — rrule event must appear; one-off must not
     results = store.list_in_range(
-        datetime(2024, 2, 1, tzinfo=timezone.utc),
-        datetime(2024, 3, 1, tzinfo=timezone.utc),
+        datetime(2024, 2, 1, tzinfo=UTC),
+        datetime(2024, 3, 1, tzinfo=UTC),
     )
     titles = {e.title for e in results}
     assert "Daily Standup" in titles
@@ -125,7 +128,7 @@ def test_rrule_events_returned_regardless_of_date(store: EventStore) -> None:
 
 
 def test_end_equal_to_start_raises() -> None:
-    t = datetime(2024, 1, 15, 10, 0, tzinfo=timezone.utc)
+    t = datetime(2024, 1, 15, 10, 0, tzinfo=UTC)
     with pytest.raises(ValueError):
         make_event(start=t, end=t)
 
@@ -133,8 +136,8 @@ def test_end_equal_to_start_raises() -> None:
 def test_end_before_start_raises() -> None:
     with pytest.raises(ValueError):
         make_event(
-            start=datetime(2024, 1, 15, 10, 0, tzinfo=timezone.utc),
-            end=datetime(2024, 1, 15, 9, 0, tzinfo=timezone.utc),
+            start=datetime(2024, 1, 15, 10, 0, tzinfo=UTC),
+            end=datetime(2024, 1, 15, 9, 0, tzinfo=UTC),
         )
 
 
@@ -154,10 +157,12 @@ def test_rrule_and_google_id_nullable(store: EventStore) -> None:
 
 
 def test_rrule_and_google_id_stored(store: EventStore) -> None:
-    event = store.add(make_event(
-        rrule="FREQ=WEEKLY;BYDAY=MO",
-        google_id="abc123",
-    ))
+    event = store.add(
+        make_event(
+            rrule="FREQ=WEEKLY;BYDAY=MO",
+            google_id="abc123",
+        )
+    )
     retrieved = store.get(event.id)
     assert retrieved.rrule == "FREQ=WEEKLY;BYDAY=MO"
     assert retrieved.google_id == "abc123"

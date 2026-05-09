@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: WeekPlan
+message: "If you use this software in research or publications, please cite it."
+type: software
+authors:
+  - given-names: Sumal
+    family-names: Surendra
+    # orcid: 'https://orcid.org/0000-0000-0000-0000'
+repository-code: 'https://github.com/sssurendra99/weekplan'
+license: MIT
+version: 0.1.0
+date-released: '2026-XX-XX'

@@ -1,0 +1,105 @@
+name: 🐛 Bug report
+description: Report a bug or unexpected behavior
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report! Please check [existing issues](https://github.com/sssurendra99/weekplan/issues) before submitting.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+      placeholder: "Clicking the + button does nothing on Wayland."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps that consistently produce the bug.
+      placeholder: |
+        1. Open WeekPlan
+        2. Click the + button in the header bar
+        3. Nothing happens
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: version
+    attributes:
+      label: WeekPlan version
+      options:
+        - "0.1.0"
+        - "Built from main"
+        - "Other (specify in description)"
+    validations:
+      required: true
+
+  - type: input
+    id: distro
+    attributes:
+      label: Linux distribution and version
+      placeholder: "Fedora 41 / Ubuntu 24.04 / Arch"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: desktop
+    attributes:
+      label: Desktop environment
+      options:
+        - GNOME 47+
+        - GNOME 46
+        - GNOME 45
+        - KDE Plasma 6
+        - Other (specify in description)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: display
+    attributes:
+      label: Display server
+      options:
+        - Wayland
+        - X11
+        - Don't know
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.12.3"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Run `WEEKPLAN_LOG_LEVEL=DEBUG python -m weekplan` and paste relevant output.
+      render: shell
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I searched existing issues
+          required: true
+        - label: I'm using the latest version (0.1.0+) or main
+          required: true
+        - label: I can reproduce this consistently
+          required: true
