@@ -26,7 +26,7 @@ jobs:
             python3-dev \
             gir1.2-gtk-4.0 \
             gir1.2-adw-1
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
