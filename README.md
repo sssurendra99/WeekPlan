@@ -36,7 +36,7 @@ A beautiful, fast, week-at-a-glance calendar for GNOME Linux.
 
 ### From Flathub
 
-Coming soon. Track progress in [issue #1](https://github.com/sssurendra99/WeekPlan/issues/1).
+Coming soon. Track progress in [issue #1](https://github.com/sssurendra99/weekplan/issues/1).
 
 ### From source — Flatpak (recommended)
 
@@ -80,7 +80,7 @@ flatpak install flathub org.gnome.Platform//49 org.gnome.Sdk//49
 **2. Clone, build, and run**
 
 ```bash
-git clone https://github.com/sssurendra99/WeekPlan.git
+git clone https://github.com/sssurendra99/weekplan.git
 cd weekplan
 make flatpak-build   # builds and installs locally (~2 min first time)
 make flatpak-run
@@ -136,7 +136,7 @@ sudo pacman -S python-gobject gtk4 libadwaita
 PyGObject is installed system-wide, so the venv needs `--system-site-packages`:
 
 ```bash
-git clone https://github.com/sssurendra99/WeekPlan.git
+git clone https://github.com/sssurendra99/weekplan.git
 cd weekplan
 python3 -m venv --system-site-packages .venv
 source .venv/bin/activate
@@ -190,7 +190,7 @@ python -m weekplan
 
 ## Contributing
 
-Contributions of all sizes are welcome — bug reports, feature suggestions, documentation, translations, and code. Start with [CONTRIBUTING.md](CONTRIBUTING.md), or browse [good first issues](https://github.com/sssurendra99/WeekPlan/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) if you're looking for a place to start. Have a question or idea? Open a [Discussion](https://github.com/sssurendra99/WeekPlan/discussions).
+Contributions of all sizes are welcome — bug reports, feature suggestions, documentation, translations, and code. Start with [CONTRIBUTING.md](CONTRIBUTING.md), or browse [good first issues](https://github.com/sssurendra99/weekplan/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) if you're looking for a place to start. Have a question or idea? Open a [Discussion](https://github.com/sssurendra99/weekplan/discussions).
 
 ---
 
@@ -227,4 +227,4 @@ Inspired by GNOME Calendar. Built on the shoulders of the libadwaita and PyGObje
 
 ---
 
-![Star History](https://api.star-history.com/svg?repos=sssurendra99/WeekPlan&type=Date)
+![Star History](https://api.star-history.com/svg?repos=sssurendra99/weekplan&type=Date)
