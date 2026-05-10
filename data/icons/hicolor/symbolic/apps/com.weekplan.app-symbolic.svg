@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  WeekPlan symbolic icon — 16×16, monochrome
+  Uses currentColor so GNOME themes can tint it freely.
+  Stroke weight: 1.5 px; only the today-dot is filled.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="16" height="16" viewBox="0 0 16 16">
+
+  <!-- Calendar body outline -->
+  <rect x="0.75" y="0.75" width="14.5" height="14.5" rx="2"
+        fill="none" stroke="currentColor" stroke-width="1.5"/>
+
+  <!-- Header separator line -->
+  <line x1="0.75" y1="5" x2="15.25" y2="5"
+        stroke="currentColor" stroke-width="1.5"/>
+
+  <!--
+    7 day marks: 6 tick lines + 1 filled dot (today, position 4)
+    x positions: 2.5  4.25  6.0  7.75  9.5  11.25  13.0   (spacing 1.75)
+    tick y span: 7.5 → 12
+  -->
+
+  <!-- day 1 -->
+  <line x1="2.5"  y1="7.5" x2="2.5"  y2="12"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- day 2 -->
+  <line x1="4.25" y1="7.5" x2="4.25" y2="12"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- day 3 -->
+  <line x1="6.0"  y1="7.5" x2="6.0"  y2="12"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- day 4 — today: filled dot -->
+  <circle cx="7.75" cy="9.75" r="1.5" fill="currentColor"/>
+
+  <!-- day 5 -->
+  <line x1="9.5"  y1="7.5" x2="9.5"  y2="12"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- day 6 -->
+  <line x1="11.25" y1="7.5" x2="11.25" y2="12"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- day 7 -->
+  <line x1="13.0" y1="7.5" x2="13.0"  y2="12"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+
+</svg>

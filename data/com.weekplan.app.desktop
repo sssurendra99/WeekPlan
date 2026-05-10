@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=WeekPlan
+GenericName=Week Calendar
+Comment=A beautiful, fast, week-at-a-glance calendar
+Exec=weekplan
+Icon=com.weekplan.app
+Terminal=false
+Type=Application
+Categories=Office;Calendar;GTK;
+Keywords=calendar;schedule;agenda;week;events;planner;
+StartupNotify=true
+StartupWMClass=com.weekplan.app
+X-GNOME-UsesNotifications=true

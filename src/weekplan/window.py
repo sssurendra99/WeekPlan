@@ -9,10 +9,9 @@ from datetime import UTC, date, datetime, timedelta
 import gi
 
 gi.require_version("Gtk", "4.0")
-gi.require_version("Gdk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Adw, Gdk, Gio, GLib, Gtk, Pango
+from gi.repository import Adw, Gio, GLib, Gtk, Pango
 
 from .config import _
 from .models.event import Event
@@ -39,6 +38,10 @@ class WeekPlanWindow(Adw.ApplicationWindow):
         self.set_default_size(1200, 700)
         self.set_title(_("Week Plan"))
 
+        style_mgr = Adw.StyleManager.get_default()
+        self._sync_dark_class(style_mgr)
+        style_mgr.connect("notify::dark", lambda m, _p: self._sync_dark_class(m))
+
         toolbar_view = Adw.ToolbarView()
         self.set_content(toolbar_view)
 
@@ -59,7 +62,9 @@ class WeekPlanWindow(Adw.ApplicationWindow):
             self._sync_btn = None
 
         menu_model = Gio.Menu()
+        menu_model.append(_("Keyboard Shortcuts"), "win.shortcuts")
         menu_model.append(_("Preferences"), "win.show-preferences")
+        menu_model.append(_("About WeekPlan"), "win.show-about")
         menu_model.append(_("Quit"), "app.quit")
 
         menu_btn = Gtk.MenuButton()
@@ -124,35 +129,27 @@ class WeekPlanWindow(Adw.ApplicationWindow):
         monday = date.today() - timedelta(days=date.today().weekday())
         self._sync_mini_cal_to(monday)
 
-        # ── Keyboard shortcuts ────────────────────────────────────────
-        key_ctrl = Gtk.EventControllerKey()
-        key_ctrl.connect("key-pressed", self._on_key_pressed)
-        self.add_controller(key_ctrl)
+        # ── Window actions (accels registered in application.py) ─────────
+        for name, handler in [
+            ("new-event",  lambda a, p: self._on_add_clicked(None)),
+            ("today",      lambda a, p: self._week_view.go_today()),
+            ("prev-week",  lambda a, p: self._week_view.shift_week(-1)),
+            ("next-week",  lambda a, p: self._week_view.shift_week(1)),
+            ("sync",       lambda a, p: self.trigger_sync()),
+            ("shortcuts",  self._show_shortcuts),
+            ("show-about", self._show_about),
+        ]:
+            action = Gio.SimpleAction.new(name, None)
+            action.connect("activate", handler)
+            self.add_action(action)
 
-    # ------------------------------------------------------------------ keyboard
+    # ------------------------------------------------------------------ dark mode
 
-    def _on_key_pressed(
-        self,
-        _controller: Gtk.EventControllerKey,
-        keyval: int,
-        _keycode: int,
-        state: Gdk.ModifierType,
-    ) -> bool:
-        if state & Gdk.ModifierType.CONTROL_MASK:
-            return False
-        if keyval == Gdk.KEY_n:
-            self._on_add_clicked(None)
-            return True
-        if keyval == Gdk.KEY_t:
-            self._week_view.go_today()
-            return True
-        if keyval == Gdk.KEY_Left:
-            self._week_view.shift_week(-1)
-            return True
-        if keyval == Gdk.KEY_Right:
-            self._week_view.shift_week(1)
-            return True
-        return False
+    def _sync_dark_class(self, manager: Adw.StyleManager) -> None:
+        if manager.get_dark():
+            self.add_css_class("app-dark")
+        else:
+            self.remove_css_class("app-dark")
 
     # ------------------------------------------------------------------ mini cal sync
 
@@ -244,6 +241,99 @@ class WeekPlanWindow(Adw.ApplicationWindow):
 
         row.append(info)
         return row
+
+    def _show_shortcuts(self, _action: Gio.SimpleAction, _param: object) -> None:
+        builder = Gtk.Builder()
+        builder.add_from_string("""<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkShortcutsWindow" id="sw">
+    <property name="modal">1</property>
+    <child>
+      <object class="GtkShortcutsSection">
+        <property name="section-name">main</property>
+        <child>
+          <object class="GtkShortcutsGroup">
+            <property name="title" translatable="yes">Navigation</property>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="title" translatable="yes">Previous week</property>
+                <property name="accelerator">Left</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="title" translatable="yes">Next week</property>
+                <property name="accelerator">Right</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="title" translatable="yes">Jump to today</property>
+                <property name="accelerator">&lt;Ctrl&gt;T</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="title" translatable="yes">Sync with Google Calendar</property>
+                <property name="accelerator">F5</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcutsGroup">
+            <property name="title" translatable="yes">Events</property>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="title" translatable="yes">New event</property>
+                <property name="accelerator">&lt;Ctrl&gt;N</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcutsGroup">
+            <property name="title" translatable="yes">App</property>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="title" translatable="yes">Keyboard shortcuts</property>
+                <property name="accelerator">&lt;Ctrl&gt;question</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="title" translatable="yes">Quit</property>
+                <property name="accelerator">&lt;Ctrl&gt;Q</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>""")
+        sw = builder.get_object("sw")
+        sw.set_transient_for(self)
+        sw.present()
+
+    def _show_about(self, _action: Gio.SimpleAction, _param: object) -> None:
+        from importlib.metadata import version as pkg_version
+
+        try:
+            ver = pkg_version("weekplan")
+        except Exception:
+            ver = "0.1.0"
+        about = Adw.AboutDialog()
+        about.set_application_name("WeekPlan")
+        about.set_application_icon("com.weekplan.app")
+        about.set_developer_name("Sumal Surendra")
+        about.set_version(ver)
+        about.set_copyright("© 2026 Sumal Surendra")
+        about.set_license_type(Gtk.License.MIT_X11)
+        about.set_website("https://github.com/sssurendra99/weekplan")
+        about.set_issue_url("https://github.com/sssurendra99/weekplan/issues")
+        about.set_developers(["Sumal Surendra"])
+        about.present(self)
 
     def _on_show_preferences(self, _action: Gio.SimpleAction, _param: object) -> None:
         from .widgets.preferences_dialog import PreferencesDialog

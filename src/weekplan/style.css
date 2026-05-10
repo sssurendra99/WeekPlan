@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────────────
-   WeekPlan stylesheet  ·  GTK4 + libadwaita  ·  Sleek Color Redesign
+   WeekPlan stylesheet  ·  GTK4 + libadwaita
    ───────────────────────────────────────────────────────────────────── */
 
 /* ── Design tokens ────────────────────────────────────────────────────── */
@@ -35,7 +35,6 @@
     background: alpha(black, 0.05);
 }
 
-/* Prev / Next arrows */
 .nav-arrow {
     border-radius: 50%;
     min-width: 32px;
@@ -44,11 +43,10 @@
     font-weight: 300;
     padding: 0 10px;
     color: @wp_text_secondary;
+    transition: background-color 120ms ease, color 120ms ease;
 }
-.nav-arrow:hover {
-    color: @wp_text_primary;
-    background-color: alpha(black, 0.06);
-}
+.nav-arrow:hover  { color: @wp_text_primary; background-color: alpha(black, 0.06); }
+.nav-arrow:active { transform: scale(0.93); }
 
 /* ── Fixed day-header bar ─────────────────────────────────────────────── */
 
@@ -67,7 +65,6 @@
     border-left: 1px solid @wp_border;
 }
 
-/* Day-name label */
 .wp-day-name {
     font-size: 10px;
     font-weight: 700;
@@ -78,7 +75,6 @@
     color: @wp_accent;
 }
 
-/* Large date number */
 .wp-day-number {
     font-size: 16px;
     font-weight: 400;
@@ -87,7 +83,6 @@
     min-height: 30px;
 }
 
-/* Today: filled accent circle */
 label.wp-day-number.today {
     color: white;
     background: @wp_accent;
@@ -122,12 +117,10 @@ label.wp-day-number.today {
     min-height: 56px;
 }
 
-/* Alternating band every other hour for visual rhythm */
 .wp-hour-cell.alt-hour {
     background: alpha(black, 0.013);
 }
 
-/* Today column */
 .wp-hour-cell.today-cell {
     background: @wp_today_tint;
     border-left-color: alpha(@wp_accent, 0.15);
@@ -136,7 +129,6 @@ label.wp-day-number.today {
     background: alpha(@wp_accent, 0.055);
 }
 
-/* Weekend columns */
 .wp-hour-cell.weekend-cell {
     background: alpha(black, 0.008);
 }
@@ -157,17 +149,17 @@ button.wp-event {
     outline: none;
     box-shadow: none;
     background-image: none;
-    transition: opacity 120ms ease;
+    transition: filter 120ms ease, transform 120ms ease, background 120ms ease;
 }
-button.wp-event:hover  { opacity: 0.88; background-image: none; }
-button.wp-event:active { opacity: 0.72; background-image: none; }
+button.wp-event:hover        { filter: brightness(1.05); background-image: none; }
+button.wp-event:active       { transform: scale(0.99); filter: brightness(1.0); background-image: none; }
+button.wp-event.solid:hover  { filter: brightness(1.1); }
 button.wp-event:focus-visible {
     outline: 2px solid @wp_accent;
     outline-offset: 2px;
 }
 
-/* ── Tinted variants — saturated pastels + left accent stripe ─────────── */
-
+/* Tinted variants */
 button.wp-event.color-sky      { background: #DBEAFE; color: #1D4ED8; box-shadow: inset 3px 0 0 0 #3B82F6; }
 button.wp-event.color-sage     { background: #D1FAE5; color: #065F46; box-shadow: inset 3px 0 0 0 #10B981; }
 button.wp-event.color-amber    { background: #FEF3C7; color: #92400E; box-shadow: inset 3px 0 0 0 #F59E0B; }
@@ -186,8 +178,7 @@ button.wp-event.color-rose:hover,     button.wp-event.color-rose:active     { ba
 button.wp-event.color-teal:hover,     button.wp-event.color-teal:active     { background: #CCFBF1; box-shadow: inset 3px 0 0 0 #14B8A6; }
 button.wp-event.color-slate:hover,    button.wp-event.color-slate:active    { background: #E2E8F0; box-shadow: inset 3px 0 0 0 #64748B; }
 
-/* ── Solid variants — vibrant gradients for live + next-up ───────────── */
-
+/* Solid variants — vivid gradients for live + next-up */
 button.wp-event.solid            { color: white; box-shadow: none; }
 
 button.wp-event.solid.color-sky      { background: linear-gradient(to bottom, #60A5FA 0%, #3B82F6 100%); }
@@ -226,7 +217,6 @@ button.wp-event.past { opacity: 0.38; }
 }
 button.wp-event.short .wp-event-title { font-size: 11px; }
 
-/* Pulsing live dot */
 .wp-live-dot {
     background: white;
     min-width: 6px;
@@ -284,6 +274,7 @@ button.wp-event.short .wp-event-title { font-size: 11px; }
     padding: 12px 14px;
     margin: 8px 16px;
     box-shadow: 0 2px 10px alpha(black, 0.06);
+    transition: background 120ms ease, box-shadow 120ms ease;
 }
 .wp-banner-eyebrow          { font-size: 9px; font-weight: 600; letter-spacing: 0.14em; }
 .wp-banner-eyebrow.live     { color: @wp_live_green; }
@@ -302,58 +293,12 @@ button.wp-event.short .wp-event-title { font-size: 11px; }
 }
 .wp-banner-empty { font-size: 12px; color: @wp_text_tertiary; }
 
-/* ── Dark mode ────────────────────────────────────────────────────────── */
-
-/* Headers: deep navy frosted glass */
-.dark .week-nav-row          { background: alpha(#0D0F1A, 0.90); border-bottom-color: alpha(white, 0.07); }
-.dark .week-header-bar       { background: alpha(#0D0F1A, 0.90); border-bottom-color: alpha(white, 0.07); box-shadow: 0 1px 0 alpha(white, 0.05); }
-.dark .header-corner-spacer  { background: alpha(#0D0F1A, 0.90); }
-.dark .day-header-cell       { border-left-color: alpha(white, 0.07); }
-
-/* Grid */
-.dark .wp-hour-cell          { border-bottom-color: alpha(white, 0.035); border-left-color: alpha(white, 0.05); }
-.dark .wp-hour-cell.alt-hour { background: alpha(white, 0.018); }
-.dark .wp-hour-cell.today-cell          { background: alpha(@wp_accent, 0.08); border-left-color: alpha(@wp_accent, 0.25); }
-.dark .wp-hour-cell.today-cell.alt-hour { background: alpha(@wp_accent, 0.11); }
-.dark .wp-hour-cell.weekend-cell        { background: alpha(white, 0.010); }
-.dark .wp-hour-cell.today-cell.weekend-cell          { background: alpha(@wp_accent, 0.08); }
-.dark .wp-hour-cell.today-cell.weekend-cell.alt-hour { background: alpha(@wp_accent, 0.11); }
-
-/* Dark tinted cards — vivid alpha tints + bright accent stripe */
-.dark button.wp-event.color-sky      { background: alpha(#3B82F6, 0.22); color: #93C5FD; box-shadow: inset 3px 0 0 0 #60A5FA; }
-.dark button.wp-event.color-sage     { background: alpha(#10B981, 0.22); color: #6EE7B7; box-shadow: inset 3px 0 0 0 #34D399; }
-.dark button.wp-event.color-amber    { background: alpha(#F59E0B, 0.22); color: #FCD34D; box-shadow: inset 3px 0 0 0 #FBBF24; }
-.dark button.wp-event.color-coral    { background: alpha(#EF4444, 0.22); color: #FCA5A5; box-shadow: inset 3px 0 0 0 #F87171; }
-.dark button.wp-event.color-lavender { background: alpha(#8B5CF6, 0.24); color: #C4B5FD; box-shadow: inset 3px 0 0 0 #A78BFA; }
-.dark button.wp-event.color-rose     { background: alpha(#EC4899, 0.22); color: #F9A8D4; box-shadow: inset 3px 0 0 0 #F472B6; }
-.dark button.wp-event.color-teal     { background: alpha(#14B8A6, 0.22); color: #5EEAD4; box-shadow: inset 3px 0 0 0 #2DD4BF; }
-.dark button.wp-event.color-slate    { background: alpha(#64748B, 0.32); color: #CBD5E1; box-shadow: inset 3px 0 0 0 #94A3B8; }
-
-.dark button.wp-event.color-sky:hover,      .dark button.wp-event.color-sky:active      { background: alpha(#3B82F6, 0.22); box-shadow: inset 3px 0 0 0 #60A5FA; }
-.dark button.wp-event.color-sage:hover,     .dark button.wp-event.color-sage:active     { background: alpha(#10B981, 0.22); box-shadow: inset 3px 0 0 0 #34D399; }
-.dark button.wp-event.color-amber:hover,    .dark button.wp-event.color-amber:active    { background: alpha(#F59E0B, 0.22); box-shadow: inset 3px 0 0 0 #FBBF24; }
-.dark button.wp-event.color-coral:hover,    .dark button.wp-event.color-coral:active    { background: alpha(#EF4444, 0.22); box-shadow: inset 3px 0 0 0 #F87171; }
-.dark button.wp-event.color-lavender:hover, .dark button.wp-event.color-lavender:active { background: alpha(#8B5CF6, 0.24); box-shadow: inset 3px 0 0 0 #A78BFA; }
-.dark button.wp-event.color-rose:hover,     .dark button.wp-event.color-rose:active     { background: alpha(#EC4899, 0.22); box-shadow: inset 3px 0 0 0 #F472B6; }
-.dark button.wp-event.color-teal:hover,     .dark button.wp-event.color-teal:active     { background: alpha(#14B8A6, 0.22); box-shadow: inset 3px 0 0 0 #2DD4BF; }
-.dark button.wp-event.color-slate:hover,    .dark button.wp-event.color-slate:active    { background: alpha(#64748B, 0.32); box-shadow: inset 3px 0 0 0 #94A3B8; }
-
-/* Dark solid cards keep the same gradients — they pop on dark backgrounds */
-.dark button.wp-event.solid.color-amber { color: white; }
-
-/* Dark live banner */
-.dark .wp-live-banner { background: #141520; border-color: alpha(white, 0.08); box-shadow: 0 2px 10px alpha(black, 0.30); }
-
 /* ── Mini-calendar sidebar & upcoming list ────────────────────────────── */
 
 .wp-sidebar {
     border-right: 1px solid @wp_border;
     background: @wp_header_bg;
     padding: 12px 8px;
-}
-.dark .wp-sidebar {
-    background: alpha(#0D0F1A, 0.55);
-    border-right-color: alpha(white, 0.07);
 }
 
 /* ── All-day banner ───────────────────────────────────────────────────── */
@@ -363,17 +308,10 @@ button.wp-event.short .wp-event-title { font-size: 11px; }
     background: @wp_header_bg;
     min-height: 4px;
 }
-.dark .wp-allday-banner {
-    background: alpha(#0D0F1A, 0.90);
-    border-bottom-color: alpha(white, 0.07);
-}
 
 .wp-allday-cell {
     border-left: 1px solid @wp_border;
     padding: 0;
-}
-.dark .wp-allday-cell {
-    border-left-color: alpha(white, 0.07);
 }
 
 button.wp-allday-tag {
@@ -398,15 +336,6 @@ button.wp-allday-tag.color-rose     { background: #FCE7F3; color: #9D174D; }
 button.wp-allday-tag.color-teal     { background: #CCFBF1; color: #134E4A; }
 button.wp-allday-tag.color-slate    { background: #E2E8F0; color: #1E293B; }
 
-.dark button.wp-allday-tag.color-sky      { background: alpha(#3B82F6, 0.22); color: #93C5FD; }
-.dark button.wp-allday-tag.color-sage     { background: alpha(#10B981, 0.22); color: #6EE7B7; }
-.dark button.wp-allday-tag.color-amber    { background: alpha(#F59E0B, 0.22); color: #FCD34D; }
-.dark button.wp-allday-tag.color-coral    { background: alpha(#EF4444, 0.22); color: #FCA5A5; }
-.dark button.wp-allday-tag.color-lavender { background: alpha(#8B5CF6, 0.24); color: #C4B5FD; }
-.dark button.wp-allday-tag.color-rose     { background: alpha(#EC4899, 0.22); color: #F9A8D4; }
-.dark button.wp-allday-tag.color-teal     { background: alpha(#14B8A6, 0.22); color: #5EEAD4; }
-.dark button.wp-allday-tag.color-slate    { background: alpha(#64748B, 0.32); color: #CBD5E1; }
-
 /* ── Upcoming section ─────────────────────────────────────────────────── */
 
 .wp-sidebar-section-title {
@@ -423,9 +352,6 @@ button.wp-allday-tag.color-slate    { background: #E2E8F0; color: #1E293B; }
 }
 .wp-upcoming-row:hover {
     background: alpha(black, 0.04);
-}
-.dark .wp-upcoming-row:hover {
-    background: alpha(white, 0.05);
 }
 
 .wp-upcoming-dot {
@@ -474,5 +400,109 @@ button.wp-allday-tag.color-slate    { background: #E2E8F0; color: #1E293B; }
     min-height: 6px;
 }
 .wp-resize-handle:hover { background: alpha(black, 0.26); }
-.dark .wp-resize-handle { background: alpha(white, 0.15); }
-.dark .wp-resize-handle:hover { background: alpha(white, 0.30); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK MODE  —  .app-dark is applied programmatically via Adw.StyleManager
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Navigation ─────────────────────────────────────────────────────── */
+
+.app-dark .week-nav-row         { background: alpha(#09091a, 0.96); border-bottom-color: alpha(white, 0.06); }
+.app-dark .week-nav-label       { color: #dde4f0; }
+.app-dark .week-nav-label:hover { background: alpha(white, 0.07); }
+.app-dark .nav-arrow            { color: #6b7b96; }
+.app-dark .nav-arrow:hover      { color: #dde4f0; background-color: alpha(white, 0.07); }
+
+/* ── Day header ─────────────────────────────────────────────────────── */
+
+.app-dark .week-header-bar      { background: alpha(#09091a, 0.96); border-bottom-color: alpha(white, 0.06); box-shadow: 0 1px 0 alpha(white, 0.04); }
+.app-dark .header-corner-spacer { background: alpha(#09091a, 0.96); }
+.app-dark .day-header-cell      { border-left-color: alpha(white, 0.06); }
+
+.app-dark .wp-day-name          { color: #4e5f78; }
+.app-dark .wp-day-name.today    { color: #7aa0f0; }
+.app-dark .wp-day-number        { color: #c2cfe0; }
+
+.app-dark label.wp-day-number.today {
+    background: #3660c0;
+    color: #eef4ff;
+}
+
+/* ── Hour labels ────────────────────────────────────────────────────── */
+
+.app-dark .wp-hour-label      { color: #3d4f66; }
+.app-dark .wp-hour-label.now  { color: #f87171; font-weight: 700; }
+
+/* ── Grid ───────────────────────────────────────────────────────────── */
+
+.app-dark .wp-hour-cell          { border-bottom-color: alpha(white, 0.028); border-left-color: alpha(white, 0.042); }
+.app-dark .wp-hour-cell.alt-hour { background: alpha(white, 0.016); }
+
+.app-dark .wp-hour-cell.today-cell          { background: alpha(#4f6ef7, 0.10); border-left-color: alpha(#4f6ef7, 0.24); }
+.app-dark .wp-hour-cell.today-cell.alt-hour { background: alpha(#4f6ef7, 0.14); }
+
+.app-dark .wp-hour-cell.weekend-cell                     { background: alpha(white, 0.008); }
+.app-dark .wp-hour-cell.today-cell.weekend-cell          { background: alpha(#4f6ef7, 0.10); }
+.app-dark .wp-hour-cell.today-cell.weekend-cell.alt-hour { background: alpha(#4f6ef7, 0.14); }
+
+/* ── Tinted event cards — deep jewel tones ──────────────────────────── */
+
+.app-dark button.wp-event.color-sky      { background: alpha(#1e3a8a, 0.55); color: #93c5fd; box-shadow: inset 3px 0 0 0 #3b82f6; }
+.app-dark button.wp-event.color-sage     { background: alpha(#064e3b, 0.60); color: #6ee7b7; box-shadow: inset 3px 0 0 0 #10b981; }
+.app-dark button.wp-event.color-amber    { background: alpha(#78350f, 0.58); color: #fde68a; box-shadow: inset 3px 0 0 0 #f59e0b; }
+.app-dark button.wp-event.color-coral    { background: alpha(#7f1d1d, 0.58); color: #fca5a5; box-shadow: inset 3px 0 0 0 #ef4444; }
+.app-dark button.wp-event.color-lavender { background: alpha(#4c1d95, 0.55); color: #c4b5fd; box-shadow: inset 3px 0 0 0 #8b5cf6; }
+.app-dark button.wp-event.color-rose     { background: alpha(#831843, 0.55); color: #f9a8d4; box-shadow: inset 3px 0 0 0 #ec4899; }
+.app-dark button.wp-event.color-teal     { background: alpha(#134e4a, 0.62); color: #5eead4; box-shadow: inset 3px 0 0 0 #14b8a6; }
+.app-dark button.wp-event.color-slate    { background: alpha(#1e293b, 0.70); color: #cbd5e1; box-shadow: inset 3px 0 0 0 #64748b; }
+
+.app-dark button.wp-event.color-sky:hover,      .app-dark button.wp-event.color-sky:active      { background: alpha(#1e3a8a, 0.70); box-shadow: inset 3px 0 0 0 #3b82f6; }
+.app-dark button.wp-event.color-sage:hover,     .app-dark button.wp-event.color-sage:active     { background: alpha(#064e3b, 0.75); box-shadow: inset 3px 0 0 0 #10b981; }
+.app-dark button.wp-event.color-amber:hover,    .app-dark button.wp-event.color-amber:active    { background: alpha(#78350f, 0.72); box-shadow: inset 3px 0 0 0 #f59e0b; }
+.app-dark button.wp-event.color-coral:hover,    .app-dark button.wp-event.color-coral:active    { background: alpha(#7f1d1d, 0.72); box-shadow: inset 3px 0 0 0 #ef4444; }
+.app-dark button.wp-event.color-lavender:hover, .app-dark button.wp-event.color-lavender:active { background: alpha(#4c1d95, 0.70); box-shadow: inset 3px 0 0 0 #8b5cf6; }
+.app-dark button.wp-event.color-rose:hover,     .app-dark button.wp-event.color-rose:active     { background: alpha(#831843, 0.70); box-shadow: inset 3px 0 0 0 #ec4899; }
+.app-dark button.wp-event.color-teal:hover,     .app-dark button.wp-event.color-teal:active     { background: alpha(#134e4a, 0.76); box-shadow: inset 3px 0 0 0 #14b8a6; }
+.app-dark button.wp-event.color-slate:hover,    .app-dark button.wp-event.color-slate:active    { background: alpha(#1e293b, 0.84); box-shadow: inset 3px 0 0 0 #64748b; }
+
+.app-dark button.wp-event.solid.color-amber { color: white; }
+
+/* ── Live banner ─────────────────────────────────────────────────────── */
+
+.app-dark .wp-live-banner            { background: #111120; border-color: alpha(white, 0.07); box-shadow: 0 2px 14px alpha(black, 0.45); }
+.app-dark .wp-banner-title           { color: #dde4f0; }
+.app-dark .wp-banner-meta            { color: #6b7b96; }
+.app-dark .wp-banner-divider         { background: alpha(white, 0.06); }
+.app-dark .wp-banner-progress-track  { background: alpha(#10b981, 0.16); }
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+
+.app-dark .wp-sidebar              { background: #0b0b18; border-right-color: alpha(white, 0.06); }
+.app-dark .wp-sidebar-section-title { color: #354455; }
+.app-dark .wp-upcoming-title        { color: #b8c8dc; }
+.app-dark .wp-upcoming-time         { color: #3d4f66; }
+.app-dark .wp-upcoming-row:hover    { background: alpha(white, 0.05); }
+.app-dark .wp-sidebar-empty         { color: #354455; }
+
+/* ── All-day banner ──────────────────────────────────────────────────── */
+
+.app-dark .wp-allday-banner { background: alpha(#09091a, 0.96); border-bottom-color: alpha(white, 0.06); }
+.app-dark .wp-allday-cell   { border-left-color: alpha(white, 0.06); }
+
+.app-dark button.wp-allday-tag.color-sky      { background: alpha(#1e3a8a, 0.55); color: #93c5fd; }
+.app-dark button.wp-allday-tag.color-sage     { background: alpha(#064e3b, 0.60); color: #6ee7b7; }
+.app-dark button.wp-allday-tag.color-amber    { background: alpha(#78350f, 0.58); color: #fde68a; }
+.app-dark button.wp-allday-tag.color-coral    { background: alpha(#7f1d1d, 0.58); color: #fca5a5; }
+.app-dark button.wp-allday-tag.color-lavender { background: alpha(#4c1d95, 0.55); color: #c4b5fd; }
+.app-dark button.wp-allday-tag.color-rose     { background: alpha(#831843, 0.55); color: #f9a8d4; }
+.app-dark button.wp-allday-tag.color-teal     { background: alpha(#134e4a, 0.62); color: #5eead4; }
+.app-dark button.wp-allday-tag.color-slate    { background: alpha(#1e293b, 0.70); color: #cbd5e1; }
+
+/* ── Resize handle ───────────────────────────────────────────────────── */
+
+.app-dark .wp-resize-handle       { background: alpha(white, 0.12); }
+.app-dark .wp-resize-handle:hover { background: alpha(white, 0.26); }
+
+/* ── Drag preview ────────────────────────────────────────────────────── */
+
+.app-dark .wp-drag-preview { background: alpha(#4f6ef7, 0.22); border-color: alpha(#7a9aff, 0.65); }

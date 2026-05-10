@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.weekplan.app</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>WeekPlan</name>
+  <summary>A beautiful, fast, week-at-a-glance calendar</summary>
+  <description>
+    <p>WeekPlan is a lightweight calendar for GNOME focused on the current week. It shows what's happening right now, what's coming up next, and helps you plan ahead without distractions.</p>
+    <p>Features:</p>
+    <ul>
+      <li>Live now-line and progress bars</li>
+      <li>Weekly view with all 7 days and 24 hours</li>
+      <li>Recurring events: daily, weekly, weekdays, custom RRULE</li>
+      <li>Native GNOME notifications</li>
+      <li>Two-way Google Calendar sync</li>
+      <li>Light and dark mode support</li>
+      <li>Lightweight — under 80 MB RAM</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">com.weekplan.app.desktop</launchable>
+  <url type="homepage">https://github.com/sssurendra99/WeekPlan</url>
+  <url type="bugtracker">https://github.com/sssurendra99/WeekPlan/issues</url>
+  <url type="vcs-browser">https://github.com/sssurendra99/WeekPlan</url>
+  <developer id="com.github.sssurendra99">
+    <name>Sumal Surendra</name>
+  </developer>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Week view with live status banner</caption>
+      <image>https://raw.githubusercontent.com/sssurendra99/WeekPlan/main/docs/images/screenshot.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Dark mode</caption>
+      <image>https://raw.githubusercontent.com/sssurendra99/WeekPlan/main/docs/images/screenshot-dark.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.1.0" date="2026-05-09">
+      <description>
+        <p>Initial release.</p>
+      </description>
+    </release>
+  </releases>
+  <branding>
+    <color type="primary" scheme_preference="light">#3584E4</color>
+    <color type="primary" scheme_preference="dark">#1A4FBA</color>
+  </branding>
+</component>

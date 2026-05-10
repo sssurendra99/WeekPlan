@@ -39,6 +39,14 @@ class WeekPlanApplication(Adw.Application):
         quit_action.connect("activate", self._on_quit)
         self.add_action(quit_action)
 
+        self.set_accels_for_action("app.quit",       ["<Ctrl>q"])
+        self.set_accels_for_action("win.new-event",  ["<Ctrl>n"])
+        self.set_accels_for_action("win.today",      ["<Ctrl>t"])
+        self.set_accels_for_action("win.prev-week",  ["Left"])
+        self.set_accels_for_action("win.next-week",  ["Right"])
+        self.set_accels_for_action("win.sync",       ["F5"])
+        self.set_accels_for_action("win.shortcuts",  ["<Ctrl>question"])
+
     def _on_quit(self, _action: Gio.SimpleAction, _param: object) -> None:
         self.release()
         self.quit()

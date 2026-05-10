@@ -176,6 +176,11 @@ class WeekView(Gtk.Box):
             self._grid.attach(card, col, grid_row, 1, row_span)
             self._event_cards.append(card)
 
+        has_events = bool(self._event_cards) or any(
+            c.get_first_child() is not None for c in self._allday_cells
+        )
+        self._content_stack.set_visible_child_name("grid" if has_events else "empty")
+
     # ------------------------------------------------------------------ build
 
     def _build_nav(self) -> None:
@@ -282,7 +287,18 @@ class WeekView(Gtk.Box):
         self._grid_overlay.add_controller(drag)
 
         self._scroll.set_child(self._grid_overlay)
-        self.append(self._scroll)
+
+        self._empty_state = Adw.StatusPage()
+        self._empty_state.set_icon_name("x-office-calendar-symbolic")
+        self._empty_state.set_title(_("A clean week ahead"))
+        self._empty_state.set_description(_("Press Ctrl+N or click + to add an event"))
+        self._empty_state.set_vexpand(True)
+
+        self._content_stack = Gtk.Stack()
+        self._content_stack.set_vexpand(True)
+        self._content_stack.add_named(self._scroll, "grid")
+        self._content_stack.add_named(self._empty_state, "empty")
+        self.append(self._content_stack)
 
         self._scroll.connect("map", self._on_first_map)
         self._update_time_indicator()
