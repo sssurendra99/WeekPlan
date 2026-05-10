@@ -4,11 +4,11 @@
 
 A beautiful, fast, week-at-a-glance calendar for GNOME Linux.
 
-[![License](https://img.shields.io/github/license/sssurendra99/weekplan?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/github/license/sssurendra99/WeekPlan?style=flat-square)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue?style=flat-square)](https://www.python.org/)
 [![GTK](https://img.shields.io/badge/GTK-4-blue?style=flat-square)](https://gtk.org/)
-[![Last commit](https://img.shields.io/github/last-commit/sssurendra99/weekplan?style=flat-square)](https://github.com/sssurendra99/weekplan/commits/main)
-[![Issues](https://img.shields.io/github/issues/sssurendra99/weekplan?style=flat-square)](https://github.com/sssurendra99/weekplan/issues)
+[![Last commit](https://img.shields.io/github/last-commit/sssurendra99/WeekPlan?style=flat-square)](https://github.com/sssurendra99/WeekPlan/commits/main)
+[![Issues](https://img.shields.io/github/issues/sssurendra99/WeekPlan?style=flat-square)](https://github.com/sssurendra99/WeekPlan/issues)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
 [![Contributor Covenant](https://img.shields.io/badge/code%20of%20conduct-Contributor%20Covenant%202.1-purple?style=flat-square)](CODE_OF_CONDUCT.md)
 
@@ -36,7 +36,7 @@ A beautiful, fast, week-at-a-glance calendar for GNOME Linux.
 
 ### From Flathub
 
-Coming soon. Track progress in [issue #1](https://github.com/sssurendra99/weekplan/issues/1).
+Coming soon. Track progress in [issue #1](https://github.com/sssurendra99/WeekPlan/issues/1).
 
 ### From source — Flatpak (recommended)
 
@@ -80,7 +80,7 @@ flatpak install flathub org.gnome.Platform//49 org.gnome.Sdk//49
 **2. Clone, build, and run**
 
 ```bash
-git clone https://github.com/sssurendra99/weekplan.git
+git clone https://github.com/sssurendra99/WeekPlan.git
 cd weekplan
 make flatpak-build   # builds and installs locally (~2 min first time)
 make flatpak-run
@@ -136,7 +136,7 @@ sudo pacman -S python-gobject gtk4 libadwaita
 PyGObject is installed system-wide, so the venv needs `--system-site-packages`:
 
 ```bash
-git clone https://github.com/sssurendra99/weekplan.git
+git clone https://github.com/sssurendra99/WeekPlan.git
 cd weekplan
 python3 -m venv --system-site-packages .venv
 source .venv/bin/activate
@@ -190,7 +190,7 @@ python -m weekplan
 
 ## Contributing
 
-Contributions of all sizes are welcome — bug reports, feature suggestions, documentation, translations, and code. Start with [CONTRIBUTING.md](CONTRIBUTING.md), or browse [good first issues](https://github.com/sssurendra99/weekplan/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) if you're looking for a place to start. Have a question or idea? Open a [Discussion](https://github.com/sssurendra99/weekplan/discussions).
+Contributions of all sizes are welcome — bug reports, feature suggestions, documentation, translations, and code. Start with [CONTRIBUTING.md](CONTRIBUTING.md), or browse [good first issues](https://github.com/sssurendra99/WeekPlan/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) if you're looking for a place to start. Have a question or idea? Open a [Discussion](https://github.com/sssurendra99/WeekPlan/discussions).
 
 ---
 
@@ -227,4 +227,4 @@ Inspired by GNOME Calendar. Built on the shoulders of the libadwaita and PyGObje
 
 ---
 
-![Star History](https://api.star-history.com/svg?repos=sssurendra99/weekplan&type=Date)
+![Star History](https://api.star-history.com/svg?repos=sssurendra99/WeekPlan&type=Date)
