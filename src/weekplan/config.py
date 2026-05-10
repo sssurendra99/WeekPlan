@@ -3,7 +3,7 @@ from pathlib import Path
 
 from gi.repository import GLib
 
-APP_ID = "com.weekplan.app"
+APP_ID = "io.github.sssurendra99.WeekPlan"
 APP_NAME = "Week Plan"
 
 # Gettext stub — translates to identity until a real .mo catalogue is installed

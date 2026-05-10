@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.weekplan.app</id>
+  <id>io.github.sssurendra99.WeekPlan</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <name>WeekPlan</name>
@@ -18,7 +18,7 @@
       <li>Lightweight — under 80 MB RAM</li>
     </ul>
   </description>
-  <launchable type="desktop-id">com.weekplan.app.desktop</launchable>
+  <launchable type="desktop-id">io.github.sssurendra99.WeekPlan.desktop</launchable>
   <url type="homepage">https://github.com/sssurendra99/WeekPlan</url>
   <url type="bugtracker">https://github.com/sssurendra99/WeekPlan/issues</url>
   <url type="vcs-browser">https://github.com/sssurendra99/WeekPlan</url>
@@ -37,7 +37,7 @@
   </screenshots>
   <content_rating type="oars-1.1" />
   <releases>
-    <release version="0.1.0" date="2026-05-09">
+    <release version="0.1.0" date="2026-05-10">
       <description>
         <p>Initial release.</p>
       </description>

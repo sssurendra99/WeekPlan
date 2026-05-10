@@ -325,7 +325,7 @@ class WeekPlanWindow(Adw.ApplicationWindow):
             ver = "0.1.0"
         about = Adw.AboutDialog()
         about.set_application_name("WeekPlan")
-        about.set_application_icon("com.weekplan.app")
+        about.set_application_icon("io.github.sssurendra99.WeekPlan")
         about.set_developer_name("Sumal Surendra")
         about.set_version(ver)
         about.set_copyright("© 2026 Sumal Surendra")
