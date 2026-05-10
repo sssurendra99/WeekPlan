@@ -131,12 +131,12 @@ class WeekPlanWindow(Adw.ApplicationWindow):
 
         # ── Window actions (accels registered in application.py) ─────────
         for name, handler in [
-            ("new-event",  lambda a, p: self._on_add_clicked(None)),
-            ("today",      lambda a, p: self._week_view.go_today()),
-            ("prev-week",  lambda a, p: self._week_view.shift_week(-1)),
-            ("next-week",  lambda a, p: self._week_view.shift_week(1)),
-            ("sync",       lambda a, p: self.trigger_sync()),
-            ("shortcuts",  self._show_shortcuts),
+            ("new-event", lambda a, p: self._on_add_clicked(None)),
+            ("today", lambda a, p: self._week_view.go_today()),
+            ("prev-week", lambda a, p: self._week_view.shift_week(-1)),
+            ("next-week", lambda a, p: self._week_view.shift_week(1)),
+            ("sync", lambda a, p: self.trigger_sync()),
+            ("shortcuts", self._show_shortcuts),
             ("show-about", self._show_about),
         ]:
             action = Gio.SimpleAction.new(name, None)
