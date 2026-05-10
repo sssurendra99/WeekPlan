@@ -14,8 +14,6 @@ A beautiful, fast, week-at-a-glance calendar for GNOME Linux.
 
 ![WeekPlan screenshot](docs/images/screenshot.png)
 
-<!-- TODO: capture and commit docs/images/screenshot.png before pushing -->
-
 </div>
 
 ---
@@ -40,35 +38,86 @@ A beautiful, fast, week-at-a-glance calendar for GNOME Linux.
 
 Coming soon. Track progress in [issue #1](https://github.com/sssurendra99/weekplan/issues/1).
 
-### From source (Flatpak)
+### From source — Flatpak (recommended)
+
+This is the cleanest way to run WeekPlan. It installs into an isolated sandbox with all dependencies bundled.
+
+**1. Install prerequisites**
+
+<details>
+<summary>Ubuntu / Debian</summary>
 
 ```bash
-git clone https://github.com/sssurendra99/weekplan.git
-cd weekplan
-make flatpak-build
-flatpak run com.weekplan.app
+sudo apt install flatpak flatpak-builder
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub org.gnome.Platform//49 org.gnome.Sdk//49
 ```
 
-### From source (development)
-
-Install system dependencies for your distro, then follow the common steps below.
+</details>
 
 <details>
 <summary>Fedora</summary>
 
 ```bash
-sudo dnf install python3-gobject-devel gtk4-devel libadwaita-devel \
-  cairo-gobject-devel pkg-config
+sudo dnf install flatpak flatpak-builder
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub org.gnome.Platform//49 org.gnome.Sdk//49
 ```
 
 </details>
+
+<details>
+<summary>Arch</summary>
+
+```bash
+sudo pacman -S flatpak flatpak-builder
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub org.gnome.Platform//49 org.gnome.Sdk//49
+```
+
+</details>
+
+**2. Clone, build, and run**
+
+```bash
+git clone https://github.com/sssurendra99/weekplan.git
+cd weekplan
+make flatpak-build   # builds and installs locally (~2 min first time)
+make flatpak-run
+```
+
+> Subsequent builds are cached — only changed modules are rebuilt.
+
+To uninstall:
+
+```bash
+flatpak uninstall com.weekplan.app
+```
+
+---
+
+### From source — development
+
+Use this if you want to hack on the code. PyGObject must come from your system package manager — it cannot be installed via pip.
+
+**1. Install system dependencies**
 
 <details>
 <summary>Ubuntu / Debian</summary>
 
 ```bash
 sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-4.0 gir1.2-adw-1 \
-  libcairo2-dev pkg-config python3-dev libgirepository1.0-dev
+  python3-full libgirepository1.0-dev
+```
+
+</details>
+
+<details>
+<summary>Fedora</summary>
+
+```bash
+sudo dnf install python3-gobject python3-gobject-devel gtk4 libadwaita \
+  gobject-introspection-devel
 ```
 
 </details>
@@ -82,12 +131,27 @@ sudo pacman -S python-gobject gtk4 libadwaita
 
 </details>
 
+**2. Create a venv that can see system packages**
+
+PyGObject is installed system-wide, so the venv needs `--system-site-packages`:
+
 ```bash
 git clone https://github.com/sssurendra99/weekplan.git
 cd weekplan
-python -m venv .venv
+python3 -m venv --system-site-packages .venv
 source .venv/bin/activate
-pip install -e .
+pip install -e ".[dev]"
+```
+
+**3. Run**
+
+```bash
+.venv/bin/python -m weekplan
+```
+
+Or with the venv active:
+
+```bash
 python -m weekplan
 ```
 
@@ -118,36 +182,9 @@ python -m weekplan
 
 ## Screenshots
 
-![Week view — light mode](docs/images/screenshot.png)
-
-<!-- TODO: capture and commit docs/images/screenshot.png before pushing -->
-
-<details>
-<summary>Week view — dark mode</summary>
-
-![Week view — dark mode](docs/images/screenshot-dark.png)
-
-<!-- TODO: capture and commit docs/images/screenshot-dark.png before pushing -->
-
-</details>
-
-<details>
-<summary>Event dialog</summary>
-
-![Event dialog](docs/images/screenshot-dialog.png)
-
-<!-- TODO: capture and commit docs/images/screenshot-dialog.png before pushing -->
-
-</details>
-
-<details>
-<summary>Live banner close-up</summary>
-
-![Live banner](docs/images/screenshot-banner.png)
-
-<!-- TODO: capture and commit docs/images/screenshot-banner.png before pushing -->
-
-</details>
+| Light mode | Dark mode |
+|---|---|
+| ![Week view — light mode](docs/images/screenshot.png) | ![Week view — dark mode](docs/images/screenshot-dark.png) |
 
 ---
 

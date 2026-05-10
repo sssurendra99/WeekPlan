@@ -24,6 +24,7 @@ htmlcov/
 .pre-commit-cache/
 
 # Flatpak build artefacts
+.flatpak-builder/
 build-dir/
 repo/
 *.flatpak
