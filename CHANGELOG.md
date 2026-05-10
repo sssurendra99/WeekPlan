@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-## [0.1.0] - 2026-XX-XX
+## [0.1.0] - 2026-05-10
 
 ### Added
 - Week view with 7-day grid and 24-hour scrolling timeline
@@ -35,5 +35,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Eight color options per event with tinted and solid styling
 - Flatpak packaging
 
-[Unreleased]: https://github.com/sssurendra99/weekplan/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/sssurendra99/weekplan/releases/tag/v0.1.0
+[Unreleased]: https://github.com/sssurendra99/WeekPlan/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/sssurendra99/WeekPlan/releases/tag/v0.1.0
