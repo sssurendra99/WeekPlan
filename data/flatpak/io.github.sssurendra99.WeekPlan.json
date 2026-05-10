@@ -295,8 +295,10 @@
       ],
       "sources": [
         {
-          "type": "dir",
-          "path": "../.."
+          "type": "git",
+          "url": "https://github.com/sssurendra99/WeekPlan.git",
+          "tag": "v0.1.0",
+          "commit": "670d0caa29b76d441e27d3c546baa3cb61258eb1"
         }
       ]
     }
