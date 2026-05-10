@@ -1,5 +1,5 @@
 {
-  "app-id": "com.weekplan.app",
+  "app-id": "io.github.sssurendra99.WeekPlan",
   "runtime": "org.gnome.Platform",
   "runtime-version": "49",
   "sdk": "org.gnome.Sdk",
@@ -288,10 +288,10 @@
       "buildsystem": "simple",
       "build-commands": [
         "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} --no-deps . --no-build-isolation",
-        "install -Dm644 data/com.weekplan.app.desktop ${FLATPAK_DEST}/share/applications/com.weekplan.app.desktop",
-        "install -Dm644 data/com.weekplan.app.metainfo.xml ${FLATPAK_DEST}/share/metainfo/com.weekplan.app.metainfo.xml",
-        "install -Dm644 data/icons/hicolor/scalable/apps/com.weekplan.app.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/com.weekplan.app.svg",
-        "install -Dm644 data/icons/hicolor/symbolic/apps/com.weekplan.app-symbolic.svg ${FLATPAK_DEST}/share/icons/hicolor/symbolic/apps/com.weekplan.app-symbolic.svg"
+        "install -Dm644 data/io.github.sssurendra99.WeekPlan.desktop ${FLATPAK_DEST}/share/applications/io.github.sssurendra99.WeekPlan.desktop",
+        "install -Dm644 data/io.github.sssurendra99.WeekPlan.metainfo.xml ${FLATPAK_DEST}/share/metainfo/io.github.sssurendra99.WeekPlan.metainfo.xml",
+        "install -Dm644 data/icons/hicolor/scalable/apps/io.github.sssurendra99.WeekPlan.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/io.github.sssurendra99.WeekPlan.svg",
+        "install -Dm644 data/icons/hicolor/symbolic/apps/io.github.sssurendra99.WeekPlan-symbolic.svg ${FLATPAK_DEST}/share/icons/hicolor/symbolic/apps/io.github.sssurendra99.WeekPlan-symbolic.svg"
       ],
       "sources": [
         {

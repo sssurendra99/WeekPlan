@@ -36,10 +36,10 @@ format:
 	ruff check --fix .
 
 flatpak-build:
-	flatpak-builder --user --install --force-clean build-dir data/flatpak/com.weekplan.app.json
+	flatpak-builder --user --install --force-clean build-dir data/flatpak/io.github.sssurendra99.WeekPlan.json
 
 flatpak-run:
-	flatpak run com.weekplan.app
+	flatpak run io.github.sssurendra99.WeekPlan
 
 flatpak-clean:
 	rm -rf build-dir .flatpak-builder repo
