@@ -7,7 +7,7 @@ name = "weekplan"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "PyGObject>=3.42,<3.50",
+    "PyGObject>=3.56.3,<3.57",
     "python-dateutil",
     "google-api-python-client",
     "google-auth-oauthlib",
